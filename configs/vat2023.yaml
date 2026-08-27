@@ -1,0 +1,10 @@
+dataset: vat2023
+root: data/raw/vat_2023
+fallback_root: data/raw/vat_speed
+metadata: data/processed/metadata/vat2023_metadata.csv
+features: data/processed/features/vat2023_features.parquet
+split: data/processed/splits/vat2023_cross_speed_split.csv
+results: results/tables/vat2023_validation_results.csv
+fs: 1.0
+max_samples_per_signal: null
+max_files: null

@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this benchmark package, please cite the accompanying manuscript and MCC5 data article."
+title: "Recording-Grouped MCC5 Bearing Benchmark"
+type: software
+authors:
+  - family-names: Li
+    given-names: Yu
+version: 3.1.2
+date-released: 2026-07-11
+license: MIT
+repository-code: "https://github.com/YOMMMO/mcc5-bearing-paper-review"
+url: "https://github.com/YOMMMO/mcc5-bearing-paper-review"
+preferred-citation:
+  type: article
+  title: "Recording-Grouped Bearing Fault Diagnosis under Directional Operating-Condition Shifts on the MCC5 Electric-Drive Benchmark"
+  authors:
+    - family-names: Li
+      given-names: Yu
+  year: 2026
+  status: unpublished

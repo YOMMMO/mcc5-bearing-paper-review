@@ -1,0 +1,61 @@
+# Scientific Review Guide
+
+## Recommended Reading Order
+
+1. `paper/main.pdf`
+2. `paper/supplementary.pdf`
+3. `review/CLAIM_EVIDENCE_MAP.md`
+4. `data/recording_catalog_and_splits.csv`
+5. Relevant files under `evidence/`
+6. Code and exact input schemas only where a methodological claim requires implementation verification
+
+## Scientific Identity of the Paper
+
+This is a benchmark and evidence-audit study. Its primary contributions are:
+
+1. recording-grouped evaluation on the MCC5 bearing subset;
+2. directional analysis of operating-condition shifts;
+3. repeated grouped partitions and recording-level uncertainty;
+4. exact feature-membership and fusion-input audits.
+
+It is not presented as a new state-of-the-art domain-generalization network.
+
+## Evidence Hierarchy
+
+### Confirmatory or predefined evidence
+
+- Frozen recording-grouped source-file, cross-condition, cross-load, and cross-RPM protocols.
+- Classical model results and repeated grouped partition sensitivity.
+- Corrected raw-neural and strict engineered/fusion results generated with training-only z-score statistics.
+- Recording-level aggregation and class-stratified recording bootstrap.
+
+### Descriptive sensitivity evidence
+
+- Full one-second raw-input comparison.
+- Severity-stratified analysis.
+- Per-recording probability visualization.
+
+### Post-hoc exploratory evidence
+
+- `auxiliary_26` and `auxiliary_context_28` on the already inspected 3000-rpm holdout.
+
+These auxiliary configurations may generate hypotheses but must not be treated as independently confirmed model superiority.
+
+## Important Boundaries
+
+- The independent unit available in the public metadata is an acquisition recording, not a verifiably unique physical bearing specimen.
+- The 15,036 overlapping windows are not 15,036 independent experimental replicates.
+- The strongest difficulty is directional upward extrapolation from 1000/2000 rpm to 3000 rpm.
+- Current order-related features do not establish universal speed invariance.
+- Results are limited to the MCC5 bearing-only subset and one test rig.
+
+## High-Value Review Questions
+
+1. Are the title, abstract, conclusions, and claimed novelty consistent with the benchmark-level contribution?
+2. Are recording-level grouping and held-out-test exclusion described and implemented clearly enough?
+3. Are optimization-seed variability, partition variability, and recording-bootstrap uncertainty kept distinct?
+4. Does every headline number trace to a supplied evidence table?
+5. Are the auxiliary configurations consistently marked post-hoc exploratory?
+6. Are mechanical interpretations phrased as supported findings versus hypotheses?
+7. Are the limitations sufficient for the absence of physical specimen IDs and external-machine validation?
+8. Is the manuscript suitable for an applied SCI mechanical diagnostics journal, and what changes are essential before submission?

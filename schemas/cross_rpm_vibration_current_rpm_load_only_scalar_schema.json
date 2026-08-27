@@ -1,0 +1,11 @@
+{
+  "columns": [
+    "rpm_nominal",
+    "load_nm"
+  ],
+  "median": {
+    "rpm_nominal": 1000.0,
+    "load_nm": 20.0
+  },
+  "statistics_source": "training_only"
+}

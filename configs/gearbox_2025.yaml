@@ -1,0 +1,10 @@
+dataset: gearbox_2025
+root: data/raw/gearbox_2025
+metadata: data/processed/metadata/gearbox_2025_metadata.csv
+features: data/processed/features/gearbox_2025_features.parquet
+split: data/processed/splits/gearbox_2025_cross_condition_split.csv
+results: results/tables/gearbox_support_results.csv
+sampling_rate_hz: 20480
+max_samples_per_file: null
+max_channels_per_group: 4
+max_files: null

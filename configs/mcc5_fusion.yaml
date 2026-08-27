@@ -1,0 +1,13 @@
+seed: 42
+fs: 12800
+window_sec: 1.0
+stride_sec: 0.5
+fixed_length: 8192
+batch_size: 64
+epochs: 30
+early_stopping_patience: 8
+learning_rate: 0.001
+weight_decay: 0.0001
+use_class_weights: true
+num_workers: 4
+device: auto

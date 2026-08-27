@@ -1,0 +1,19 @@
+configuration,setting,severity_group,evidence_status,recording_count,seed_count,accuracy_mean,accuracy_std,macro_f1_mean,macro_f1_std
+auxiliary_26,vibration_current_auxiliary_only,Healthy (ungraded),posthoc_exploratory_same_holdout,4,5,1.0,0.0,,
+auxiliary_26,vibration_current_auxiliary_only,High,posthoc_exploratory_same_holdout,12,5,0.85,0.06972166887783961,0.8473544973544973,0.07253213735125717
+auxiliary_26,vibration_current_auxiliary_only,Light,posthoc_exploratory_same_holdout,12,5,1.0,0.0,1.0,0.0
+auxiliary_context_28,vibration_current_rpm_load,Healthy (ungraded),posthoc_exploratory_same_holdout,4,5,1.0,0.0,,
+auxiliary_context_28,vibration_current_rpm_load,High,posthoc_exploratory_same_holdout,12,5,0.8333333333333334,0.13176156917368254,0.8241798941798942,0.1492274085479646
+auxiliary_context_28,vibration_current_rpm_load,Light,posthoc_exploratory_same_holdout,12,5,1.0,0.0,1.0,0.0
+context_2,vibration_current_rpm_load_only,Healthy (ungraded),corrected_formal_train_only_zscore,4,5,0.5,0.25,,
+context_2,vibration_current_rpm_load_only,High,corrected_formal_train_only_zscore,12,5,0.6666666666666666,0.1767766952966369,0.6272486772486772,0.21724031083043002
+context_2,vibration_current_rpm_load_only,Light,corrected_formal_train_only_zscore,12,5,0.9333333333333332,0.03726779962499651,0.9322751322751323,0.03785935199999644
+full_engineered_254,full_engineered_features_254,Healthy (ungraded),corrected_formal_train_only_zscore,4,5,0.0,0.0,,
+full_engineered_254,full_engineered_features_254,High,corrected_formal_train_only_zscore,12,5,0.4,0.13693063937629152,0.3599615199615199,0.17096876008077866
+full_engineered_254,full_engineered_features_254,Light,corrected_formal_train_only_zscore,12,5,0.75,0.15590239111558085,0.692915972915973,0.19654861563071355
+full_fusion_legacy_262,full_multisource_fusion,Healthy (ungraded),corrected_formal_train_only_zscore,4,5,0.0,0.0,,
+full_fusion_legacy_262,full_multisource_fusion,High,corrected_formal_train_only_zscore,12,5,0.4666666666666667,0.13944333775567927,0.39412920412920416,0.12679133603572926
+full_fusion_legacy_262,full_multisource_fusion,Light,corrected_formal_train_only_zscore,12,5,0.7333333333333333,0.1086533734200441,0.6753631553631554,0.1488274189637485
+no_scalars,vibration_current,Healthy (ungraded),corrected_formal_train_only_zscore,4,5,0.6,0.33541019662496846,,
+no_scalars,vibration_current,High,corrected_formal_train_only_zscore,12,5,0.6333333333333333,0.1728036779443977,0.5771091871091871,0.21655293204437248
+no_scalars,vibration_current,Light,corrected_formal_train_only_zscore,12,5,0.8666666666666666,0.12638125740085918,0.8631216931216932,0.13026885907452646

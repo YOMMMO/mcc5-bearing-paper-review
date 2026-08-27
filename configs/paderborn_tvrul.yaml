@@ -1,0 +1,15 @@
+dataset: paderborn_tvrul_2024
+root: data/raw/paderborn_tvrul_2024
+metadata: data/processed/metadata/paderborn_tvrul_metadata.csv
+health_indicator: results/tables/paderborn_health_indicator.csv
+rul_results: results/tables/paderborn_rul_optional.csv
+rul_predictions: results/tables/paderborn_rul_predictions.csv
+bearings:
+  - B01
+  - B02
+  - B03
+  - B05
+fs: 64000
+healthy_fraction: 0.15
+late_fraction: 0.15
+piecewise_cap_ratio: 0.6

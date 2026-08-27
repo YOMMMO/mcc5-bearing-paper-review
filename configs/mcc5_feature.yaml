@@ -1,0 +1,6 @@
+dataset: mcc5
+fs: 12800
+window_sec: 1.0
+stride_sec: 0.5
+max_files: null
+max_windows: null

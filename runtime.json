@@ -1,0 +1,7 @@
+{
+  "run_id": "postfix_neural_fusion_20260710_180646",
+  "python": "3.12.13",
+  "expected_gpu": "NVIDIA GeForce RTX 5080",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8"
+}

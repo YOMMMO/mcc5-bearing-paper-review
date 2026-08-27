@@ -1,0 +1,10 @@
+dataset: lenze_mb
+root: data/raw/lenze_mb
+metadata: data/processed/metadata/lenze_metadata.csv
+features: data/processed/features/lenze_features.parquet
+split: data/processed/splits/lenze_cross_condition_split.csv
+results: results/tables/lenze_external_results.csv
+fs: null
+mat_array_key: StromBox_Werte
+max_samples_per_file: null
+max_files: null

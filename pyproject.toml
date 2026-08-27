@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcc5-recording-grouped-benchmark"
+version = "3.1.2"
+description = "Recording-grouped MCC5 bearing fault diagnosis benchmark"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "numpy==2.4.6",
+  "pandas==3.0.3",
+  "scipy==1.18.0",
+  "scikit-learn==1.9.0",
+  "xgboost==3.3.0",
+  "matplotlib==3.11.0",
+  "pyarrow==24.0.0",
+  "pyyaml==6.0.3",
+  "joblib==1.5.3",
+  "torch==2.11.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["src*"]
