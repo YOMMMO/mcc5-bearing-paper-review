@@ -1,0 +1,9 @@
+{
+  "acquisition_date_count": 5,
+  "cramers_v_date_vs_class": 0.7713814191848974,
+  "date_majority_accuracy_in_sample": 0.7261904761904762,
+  "date_majority_correct_in_sample": 61,
+  "interpretation": "Descriptive association only. The in-sample date-majority score is not an out-of-sample diagnostic result and indicates possible session confounding.",
+  "normalized_mutual_information_date_vs_class": 0.5989245034250874,
+  "recording_count": 84
+}

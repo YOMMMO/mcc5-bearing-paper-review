@@ -4,14 +4,16 @@
 
 - Current manuscript, supplement, journal-template preview, and figure sources.
 - Recording-level provenance, labels, conditions, and frozen roles.
+- Compact raw-file hashes/shapes and acquisition-session metadata audits, without signal redistribution.
 - Result summaries, per-seed evidence, bootstrap outputs, and input-definition audits.
+- Classical probability aggregation and majority-vote results at source-recording level.
 - Exact feature schemas and preprocessing/model code.
 - Tests for train-only normalization, evidence labels, and recording-grouped roles.
 - Environment and dependency records.
 
 ## Excluded because it is redundant, licensed elsewhere, or irrelevant to review
 
-- Raw MCC5 signals: large and already publicly hosted by the data owner.
+- Raw MCC5 signals: large, licensed separately, and already publicly hosted by the data owner. Their identity is represented by reproducible relative-path, shape, and SHA-256 evidence.
 - Window tensors and feature matrices: derivable from the raw data and code, but unnecessarily large for manuscript review.
 - Duplicate per-window split maps: replaced by one compact row per recording.
 - Checkpoints: not needed to audit manuscript logic or supplied result tables.

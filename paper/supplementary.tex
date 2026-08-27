@@ -41,9 +41,73 @@ Vibration-current + RPM/load & \nolinkurl{vibration_current_rpm_load_only} & 8 &
 \end{tabularx}
 \end{table}
 
+\section{Raw-File Provenance and Acquisition-Session Audit}
+The official raw MCC5 copy was audited without redistributing signal samples. Each of the 84 catalogued recordings resolved to one CSV file with 1,152,000 data rows and nine columns (time plus eight measured channels). Every file has a distinct SHA-256 digest. One timestamp is shared by three filenames; streaming pairwise comparison shows a common time vector but different signal values for all three pairs. These checks exclude byte-identical files and resolve the timestamp anomaly, but they do not establish independent physical bearings or acquisition sessions.
+
+\begin{table}[H]
+\centering
+\caption{Compact raw-file identity audit.}
+\label{tab:s_raw_integrity}
+\small
+\begin{tabular}{lc}
+\toprule
+Audit item & Result \\
+\midrule
+Catalogued/resolved recordings & 84 / 84 \\
+Distinct SHA-256 digests & 84 \\
+Exact duplicate digest groups & 0 \\
+Repeated timestamp groups & 1 \\
+Files in repeated group & 3 \\
+Pairwise signal-identical comparisons & 0 of 3 \\
+Raw samples redistributed & No \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The recordings occur on five acquisition dates, and class composition is uneven across those dates (Table~\ref{tab:s_date_class}). An in-sample date-majority mapping agrees with 61/84 labels (0.7262); Cramer's V is 0.7714 and normalized mutual information is 0.5989. These values are descriptive association measures computed on the same 84 recordings. They are not cross-validated diagnostic performance and do not show that the trained models use timestamp metadata. They indicate that recording grouping cannot exclude session-related nuisance structure in the measured signals.
+
+\begin{table}[H]
+\centering
+\caption{Acquisition-date and publication-class counts. Dates are parsed from public recording identifiers.}
+\label{tab:s_date_class}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Date & Healthy & Inner race & Outer race & Rolling element \\
+\midrule
+250702 & 12 & 0 & 0 & 0 \\
+250704 & 0 & 11 & 0 & 0 \\
+250707 & 0 & 12 & 11 & 24 \\
+250708 & 0 & 0 & 12 & 0 \\
+250821 & 0 & 0 & 2 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Classical Source-Recording Aggregation}
+For each primary classical protocol, window probabilities were averaged within source recording before classification; majority vote was evaluated separately. Class-stratified bootstrap resampled complete recordings 2,000 times. The high-speed limitation remains visible after aggregation, including zero worst-class recall under majority vote.
+
+\begin{table}[H]
+\centering
+\caption{Classical source-recording results under the four predefined protocols. Intervals are 95\% class-stratified recording-bootstrap intervals for mean-probability macro-F1.}
+\label{tab:s_classical_source}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llccccc}
+\toprule
+Protocol & Model & Recordings & Mean-probability macro-F1 & 95\% interval & Majority-vote macro-F1 & Mean-probability worst recall \\
+\midrule
+Predefined source-recording & XGBoost & 12 & 1.0000 & [1.0000, 1.0000] & 1.0000 & 1.0000 \\
+Cross-mode & Random forest & 42 & 0.9791 & [0.9365, 1.0000] & 0.9791 & 0.9167 \\
+Cross-load & Random forest & 42 & 1.0000 & [1.0000, 1.0000] & 1.0000 & 1.0000 \\
+1000/2000 to 3000 rpm & Random forest & 28 & 0.7020 & [0.6355, 0.8000] & 0.6444 & 0.1111 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 
 \section{Complete Fusion-Input Evidence}
-The 26- and 28-field auxiliary definitions contain two modality-presence indicators and 24 torque/key-phase waveform summaries, with the 28-field configuration additionally including RPM and load. These two definitions were isolated after the 3000-rpm holdout had been inspected and are therefore post-hoc exploratory throughout this supplement. Their numerical detail is disclosed for transparency, not as confirmatory model selection evidence. The strict 254-feature and legacy 262-field branches are retained to document input-definition sensitivity.
+The stored 26-field auxiliary definition contains 24 varying torque/key-phase waveform summaries and two modality-presence indicators that are constant in this complete-modality subset; the 28-field configuration additionally includes RPM and load. These two definitions were isolated after the 3000-rpm holdout had been inspected and are therefore post-hoc exploratory throughout this supplement. Their numerical detail is disclosed for transparency, not as confirmatory model selection evidence. The strict 254-feature and legacy 262-field branches are retained to document input-definition sensitivity.
 
 
 \begin{table}[H]
@@ -206,7 +270,7 @@ Because severity is inferred from recording identifiers and the subgroups are sm
 
 \begin{landscape}
 \begin{figure}[p]
-\centering\includegraphics[width=0.98\linewidth]{figures/figure_s3_per_recording_probability.pdf}
+\centering\includegraphics[width=0.96\linewidth,height=0.82\textheight,keepaspectratio]{figures/figure_s3_per_recording_probability.pdf}
 \caption{Per-recording class-probability audit on the 3000-rpm holdout, averaged across optimization seeds. Boxes mark the argmax class of the seed-averaged probability vector; red boxes denote errors, and orange circles denote the true class. Publication-facing class labels use ``rolling element''; original recording identifiers retain the dataset prefix ``Ball''. The auxiliary-26 panel is post-hoc exploratory on the same holdout and is shown only to localize the associated recording-level behavior.}
 \label{fig:s_recording_probability}
 \end{figure}
@@ -283,6 +347,6 @@ Fusion family & Separate three-channel vibration and current sequences plus 0/2/
 
 
 \section{Reproducibility Notes}
-The verified runtime used Python 3.12.13, PyTorch 2.11.0+cu128, and an NVIDIA GeForce RTX 5080. Automated tests cover train-only sequence and scalar standardization, constant channels, missing scalar values, serialization of fitted statistics, source-recording separation across all data roles, and the evidence-status labels applied to exploratory configurations. The software supplement includes frozen split maps, a de-identified window-to-recording index, exact input schemas, result tables, and reproduction commands; raw MCC5 signals are not redistributed.
+The verified runtime used Python 3.12.13, PyTorch 2.11.0+cu128, and an NVIDIA GeForce RTX 5080. Automated tests cover train-only sequence and scalar standardization, constant channels, missing scalar values, serialization of fitted statistics, source-recording separation across all data roles, raw-file audit integrity, classical source-recording aggregation, and the evidence-status labels applied to exploratory configurations. The software supplement includes frozen split maps, a de-identified window-to-recording index, exact input schemas, compact raw/session audit tables, result tables, and reproduction commands; raw MCC5 signals are not redistributed.
 
 \end{document}

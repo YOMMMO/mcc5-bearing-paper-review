@@ -1,0 +1,9 @@
+{
+  "catalog_recording_count": 84,
+  "deep_timestamp_pair_comparison_performed": true,
+  "exact_duplicate_sha256_group_count": 0,
+  "raw_dataset_redistributed": false,
+  "repeated_timestamp_group_count": 1,
+  "resolved_raw_file_count": 84,
+  "unique_sha256_count": 84
+}

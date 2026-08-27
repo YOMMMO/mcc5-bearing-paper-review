@@ -6,8 +6,10 @@
 2. `paper/supplementary.pdf`
 3. `review/CLAIM_EVIDENCE_MAP.md`
 4. `data/recording_catalog_and_splits.csv`
-5. Relevant files under `evidence/`
-6. Code and exact input schemas only where a methodological claim requires implementation verification
+5. `data/RAW_DATA_PROVENANCE.md`
+6. `review/SESSION_CONFOUNDING_AUDIT.md`
+7. Relevant files under `evidence/`
+8. Code and exact input schemas only where a methodological claim requires implementation verification
 
 ## Scientific Identity of the Paper
 
@@ -28,12 +30,14 @@ It is not presented as a new state-of-the-art domain-generalization network.
 - Classical model results and repeated grouped partition sensitivity.
 - Corrected raw-neural and strict engineered/fusion results generated with training-only z-score statistics.
 - Recording-level aggregation and class-stratified recording bootstrap.
+- Raw-file identity audit showing 84 distinct SHA-256 values and value-level comparison of the only repeated-timestamp group.
 
 ### Descriptive sensitivity evidence
 
 - Full one-second raw-input comparison.
 - Severity-stratified analysis.
 - Per-recording probability visualization.
+- Acquisition-date/class association and protocol-role cross-tabs; these diagnose possible session confounding but are not predictive performance estimates.
 
 ### Post-hoc exploratory evidence
 
@@ -44,6 +48,8 @@ These auxiliary configurations may generate hypotheses but must not be treated a
 ## Important Boundaries
 
 - The independent unit available in the public metadata is an acquisition recording, not a verifiably unique physical bearing specimen.
+- Distinct raw-file hashes exclude exact file duplication but do not establish independent bearings, installations, or acquisition sessions.
+- Five acquisition dates are unevenly associated with diagnostic classes; recording grouping cannot remove this residual session-level ambiguity.
 - The 15,036 overlapping windows are not 15,036 independent experimental replicates.
 - The strongest difficulty is directional upward extrapolation from 1000/2000 rpm to 3000 rpm.
 - Current order-related features do not establish universal speed invariance.
@@ -59,3 +65,4 @@ These auxiliary configurations may generate hypotheses but must not be treated a
 6. Are mechanical interpretations phrased as supported findings versus hypotheses?
 7. Are the limitations sufficient for the absence of physical specimen IDs and external-machine validation?
 8. Is the manuscript suitable for an applied SCI mechanical diagnostics journal, and what changes are essential before submission?
+9. Does the raw/session provenance evidence justify the paper's deliberately narrow recording-level claim boundary?

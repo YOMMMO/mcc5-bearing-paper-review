@@ -20,10 +20,14 @@ The package is intended for scientific peer review, including review with GPT Pr
 - Latest `Machines` template preview and source.
 - Publication figures in PDF and PNG.
 - Recording-level catalog and frozen train/validation/test roles for all four protocols.
+- Raw-file SHA-256/shape audit and deep comparison of repeated acquisition timestamps (without redistributing raw signals).
+- Acquisition-date/class cross-tabs documenting residual session-confounding risk.
+- Classical source-recording probability aggregation, majority vote, and clustered bootstrap evidence.
 - All compact evidence tables used to support the manuscript's numerical claims.
 - Exact scalar-input schemas and feature-membership definitions.
 - Train-only normalization, model, metric, preprocessing, and experiment code.
 - Environment, dependency lock, tests, license, and citation metadata.
+- A run-provenance manifest separating formal-run evidence from later review audits.
 
 ## Excluded by Design
 
@@ -40,7 +44,10 @@ The formal MCC5 data article is [Chen et al., Data in Brief 65 (2026), 112583](h
 - Formal run: `postfix_neural_fusion_20260710_180646`.
 - Classical, corrected raw-neural, and strict engineered/fusion results use recording-grouped protocols and training-only preprocessing.
 - `auxiliary_26` and `auxiliary_context_28` remain **post-hoc exploratory on the same 3000-rpm holdout**. They are not confirmatory evidence.
+- The 26 stored auxiliary fields comprise 24 varying torque/key-phase summaries and two constant modality-presence indicators in this complete-modality subset.
 - Recording separation does not establish independent physical bearing specimens.
+- All 84 catalogued raw files have distinct SHA-256 hashes. This excludes byte-identical recordings, but it does not establish specimen or acquisition-session independence.
+- Acquisition date is associated with class composition and is reported as a descriptive confounding audit, not as diagnostic performance.
 - The paper does not claim cross-machine or non-MCC5 generalization.
 
 ## Compact Data Representation
@@ -54,11 +61,11 @@ python -m compileall -q src tests run_formal_dl_fusion_gpu.py run_postfix_neural
 python -m unittest discover -s tests -v
 ```
 
-Full experiment reproduction additionally requires the raw MCC5 dataset. See [data/README.md](data/README.md).
+Full experiment reproduction additionally requires the raw MCC5 dataset. The compact raw-file audit can be rebuilt with `src/data/audit_mcc5_provenance.py`, and classical source-recording metrics with `src/experiments/exp38_classical_recording_metrics.py`. See [data/README.md](data/README.md).
 
-## Full Archival Software Supplement
+## Versioned Review Snapshot
 
-The tagged [review package release](https://github.com/YOMMMO/mcc5-bearing-paper-review/releases/tag/review-v3.1.2) also attaches the full archival software supplement. Use the repository itself for scientific review; use the release ZIP only when a reviewer needs the complete packaged workflow and detailed per-window support files.
+The tagged [review package release](https://github.com/YOMMMO/mcc5-bearing-paper-review/releases/tag/review-v3.1.3) attaches a versioned snapshot of the compact review package together with the main and supplementary PDFs. Use the repository itself for browsing and the release ZIP when a reviewer needs one versioned download.
 
 ## License
 

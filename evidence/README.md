@@ -9,6 +9,14 @@ The CSV files in this directory are the compact outputs used to generate manuscr
 - `fusion_summary.csv`
 - `source_summary.csv`
 - `bootstrap.csv`
+- `classical_source_recording_metrics.csv`
+- `classical_source_recording_bootstrap.csv`
+- `raw_file_integrity_audit.csv`
+- `timestamp_collision_audit.csv`
+- `same_timestamp_pair_comparison.csv`
+- `session_metadata_audit.csv`
+- `acquisition_date_class_counts.csv`
+- `acquisition_date_protocol_role_counts.csv`
 - `submission_consistency_audit.md`
 
-Files ending in detailed per-seed or per-recording rows support deeper verification. See `review/CLAIM_EVIDENCE_MAP.md` for the intended mapping.
+`raw_integrity_summary.json` and `session_confounding_summary.json` provide compact machine-readable summaries. The raw audit contains hashes and metadata only; no raw signal samples are redistributed. Files ending in detailed per-seed or per-recording rows support deeper verification. See `review/CLAIM_EVIDENCE_MAP.md` for the intended mapping.

@@ -17,7 +17,7 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-Windowed machinery benchmarks can overstate diagnostic transfer when correlated windows from one acquisition recording cross data partitions. We establish a recording-grouped benchmark on the MCC5-THU Motor bearing subset and examine transfer direction, grouped-partition variability, feature membership, and input semantics. The study includes 84 recordings, 15,036 overlapping windows, and 254 numeric features; neural protocols use frozen recording roles and training-only z-score statistics. XGBoost achieves 0.9964 macro-F1 on the predefined source-recording split and 0.9777 $\pm$ 0.0356 across ten grouped partitions. Random forest achieves 0.9790 for speed-circulation-to-torque-circulation transfer and 0.9891 for 20-to-40 Nm transfer. Leave-one-speed-out performance is strongly directional: macro-F1 remains near 0.99 when 1000 or 2000 rpm is withheld but falls to 0.6921 when extrapolating from 1000/2000 to 3000 rpm. Under the same high-speed holdout, the predefined 8,192-sample CNN and strict-254 scalar-branch fusion also deteriorate, while retaining the full one-second sequence does not remove the boundary. A separately labeled post-hoc input audit indicates that RPM/load alone does not account for the higher same-holdout performance associated with the auxiliary-26 bundle, which comprises two modality-presence indicators and 24 torque/key-phase waveform summaries. The contribution is a direction-aware, recording-grouped MCC5 benchmark, not evidence of specimen-independent or universal speed generalization.
+Windowed machinery benchmarks can overstate diagnostic transfer when correlated windows from one acquisition recording cross data partitions. We establish a recording-grouped benchmark on the MCC5-THU Motor bearing subset and examine transfer direction, grouped-partition variability, feature membership, and input semantics. The study includes 84 recordings, 15,036 overlapping windows, and 254 numeric features; neural protocols use frozen recording roles and training-only z-score statistics. XGBoost achieves 0.9964 macro-F1 on the predefined source-recording split and 0.9777 $\pm$ 0.0356 across ten grouped partitions. Random forest achieves 0.9790 for speed-circulation-to-torque-circulation transfer and 0.9891 for 20-to-40 Nm transfer. Leave-one-speed-out performance is strongly directional: macro-F1 remains near 0.99 when 1000 or 2000 rpm is withheld but falls to 0.6921 when extrapolating from 1000/2000 to 3000 rpm. Recording-level mean-probability aggregation preserves this high-speed boundary at 0.7020 macro-F1 over 28 test recordings, with a worst-class recall of 0.1111; majority voting yields 0.6444 macro-F1 and zero worst-class recall. A raw-file audit resolves all 84 catalogued recordings to distinct SHA-256 hashes, while a descriptive acquisition-date audit identifies residual session-confounding risk. The contribution is a direction-aware, recording-grouped MCC5 benchmark, not evidence of specimen-independent, session-independent, or universal speed generalization.
 \end{abstract}
 \noindent\textbf{Keywords:} bearing fault diagnosis; electric-drive monitoring; recording-grouped evaluation; directional transfer; speed extrapolation; multisource signals; MCC5-THU Motor
 
@@ -28,7 +28,7 @@ Localized bearing defects influence mechanical and electrical measurements diffe
 
 Evaluation provenance is equally consequential. Overlapping windows from one recording share sensor placement, background noise, control trajectory, and acquisition artifacts. Allowing those windows to cross data roles can inflate performance and underestimate uncertainty \cite{Kapoor2023Leakage,Hendriks2021CWRUBenchmark,Ragab2023AdaTime,Vieira2024ConnectomeLeakage,Wen2021MRILLeakage}. The MCC5 source article recommends recording-level separation before segmentation and training-side validation for unknown-condition evaluation \cite{Chen2026MCC5DataBrief,Chen2025MCC5Mendeley}. This study does not present recording grouping as a new algorithm. Instead, it operationalizes that principle as an auditable benchmark and asks four questions: (i) how sensitive are results to grouped partition choice; (ii) are operating-condition shifts symmetric in direction; (iii) what remains after exact feature membership replaces ambiguous substring groups; and (iv) which measured inputs are associated with apparent fusion gains under matched train-only standardization?
 
-The contributions are threefold. First, a frozen recording-grouped MCC5 benchmark is reported with explicit transfer directions and zero recording overlap across neural training, validation, and test roles. Second, repeated grouped partitions, recording-level aggregation, and class-stratified recording bootstrap are used to separate optimization variability from data uncertainty. Third, exact input audits distinguish two nominal context variables; an auxiliary-26 setting containing two modality-presence indicators and 24 waveform summaries (12 torque and 12 key-phase); a strict 254-feature engineered scalar branch; and a legacy 262-field implementation. The resulting paper is a benchmark and evidence-audit study, not a claim of universal model superiority.
+The contributions are threefold. First, a frozen recording-grouped MCC5 benchmark is reported with explicit transfer directions and zero recording overlap across neural training, validation, and test roles. Second, repeated grouped partitions, probability and vote aggregation at recording level, and class-stratified recording bootstrap are used to separate optimization variability from data uncertainty. Third, exact feature and input-schema audits are combined with raw-file identity and acquisition-session audits so that model results are interpreted within the independence that the public metadata can actually support. The resulting paper is a benchmark and evidence-audit study, not a claim of universal model superiority.
 
 \section{Related Work}
 \subsection{Vibration, current, and order-aware diagnosis}
@@ -42,6 +42,8 @@ Domain adaptation uses information from a target domain, while domain generaliza
 \section{Materials and Methods}
 \subsection{Dataset and diagnostic task}
 MCC5-THU Motor was acquired on a 2.2 kW three-phase asynchronous motor connected to a torque sensor, gearbox, magnetic-powder brake, and synchronous acquisition system \cite{Chen2026MCC5DataBrief}. Eight channels contain key phase, torque, triaxial drive-end vibration, and three-phase current at 12.8 kHz for 90 s per recording. The bearing-only task pools light and high severities into healthy, inner-race, outer-race, and rolling-element labels. Pooling severity makes this a fault-location task and introduces within-class severity heterogeneity.
+
+Raw-file provenance was audited against the official dataset copy without redistributing signal samples. For every catalogued recording, SHA-256, byte size, data shape, relative dataset path, and the acquisition timestamp encoded in the public filename were recorded. Repeated timestamps were examined by streaming value-level comparison. Acquisition dates were cross-tabulated with class and protocol role; Cramer's V, normalized mutual information, and an in-sample date-majority agreement were computed only as descriptive indicators of possible session confounding, not as diagnostic test performance.
 
 
 \begin{table}[H]
@@ -60,6 +62,8 @@ Engineered feature table & 260 columns & 254 audited numeric candidates plus ide
 Signal channels & 8 & Key phase, torque, triaxial vibration, three-phase current \\
 Sampling & 12.8 kHz, 90 s & Synchronous acquisition for each source recording \\
 Physical bearing-instance identity & Not available in public metadata & Recording separation does not establish specimen independence \\
+Raw-file identity audit & 84 distinct SHA-256 values & Excludes byte-identical files, not shared specimens or sessions \\
+Acquisition dates & 5 & Date/class association is treated as descriptive confounding evidence \\
 \bottomrule
 \end{tabular}}
 
@@ -106,12 +110,17 @@ The predefined directions are speed-circulation to torque-circulation (cross-mod
 \subsection{Models and fusion-input definitions}
 Classical baselines include logistic regression, RBF-SVM, random forest, MLP, and XGBoost using training-side median imputation. Raw CNN, temporal convolutional network (TCN), and Transformer baselines use class-weighted cross-entropy, Adam with learning rate $10^{-3}$, batch size 64, at most 30 epochs, and patience 8. Each neural comparison uses the same frozen internal validation map. All preprocessing statistics and model-selection decisions were fitted exclusively on the training and internal-validation recordings. Classical and neural hyperparameters were fixed before final test evaluation; the held-out test recordings were not used for scaling, early stopping, or hyperparameter selection. Full settings are reported in Supplementary Table S7 and the accompanying software supplement.
 
-The branch network has vibration and current encoders, an optional scalar multilayer perceptron, sigmoid gating, and a classifier head. Six input definitions are distinguished: no scalar inputs; exactly RPM and load; auxiliary-26 with two modality-presence indicators and 24 waveform summaries (12 torque and 12 key-phase); auxiliary-context-28, which adds RPM/load; a vibration-current network with a strict 254-feature engineered scalar branch (strict-254 scalar-branch fusion); and a legacy 262-field branch that additionally includes four window-position and four modality-availability fields. The auxiliary-26 and auxiliary-context-28 settings were identified after inspecting the 3000-rpm holdout and are therefore labeled post-hoc exploratory.
+The branch network has vibration and current encoders, an optional scalar multilayer perceptron, sigmoid gating, and a classifier head. Six input definitions are distinguished: no scalar inputs; exactly RPM and load; a stored 26-field auxiliary bundle containing 24 waveform summaries (12 torque and 12 key-phase) plus two modality-presence indicators that are constant in this complete-modality subset; an auxiliary-context-28 bundle that adds RPM/load; a vibration-current network with a strict 254-feature engineered scalar branch (strict-254 scalar-branch fusion); and a legacy 262-field branch that additionally includes four window-position and four modality-availability fields. The 26/28-field settings were identified after inspecting the 3000-rpm holdout and are reported only as post-hoc exploratory evidence in the Supplementary Material.
 
 \subsection{Metrics and uncertainty}
-Macro-F1 is primary, worst-class recall identifies class collapse, and accuracy is supporting. Three optimization seeds are used generally and five for the focused 3000-rpm input audit. Seed standard deviation describes training variability only. For recording-level evaluation, window-level class probabilities are averaged within each test recording before assigning the recording label. Class-stratified bootstrap resamples complete recordings 2,000 times; overlapping windows are never sampled as independent units.
+Macro-F1 is primary, worst-class recall identifies class collapse, and accuracy is supporting. Three optimization seeds are used generally and five for the focused 3000-rpm input audit. Seed standard deviation describes training variability only. For recording-level evaluation, window-level class probabilities are averaged within each test recording before assigning the recording label; majority vote is reported as a second aggregation rule. Class-stratified bootstrap resamples complete recordings 2,000 times; overlapping windows are never sampled as independent units.
 
 \section{Results}
+\subsection{Raw-file identity and acquisition-session structure}
+All 84 catalogue entries resolve to official raw files, and all 84 SHA-256 digests are distinct. One timestamp is shared by three filenames. Pairwise comparison across 1,152,000 rows and nine columns confirms a common time vector but different signal values for every pair; the anomaly is therefore not an exact file or signal duplication. This audit does not determine physical specimen identity.
+
+The recordings span five acquisition dates, and class composition is uneven across them. An in-sample date-majority mapping agrees with 61 of 84 labels (0.7262), with Cramer's V of 0.7714 and normalized mutual information of 0.5989. These are descriptive association measures, not out-of-sample diagnostic scores. They identify residual session-confounding risk that recording grouping cannot remove.
+
 \subsection{Directional classical benchmark}
 Classical feature models remain strong on source-recording, cross-mode, and cross-load protocols. Across ten grouped source-recording partitions, XGBoost reaches 0.9777 $\pm$ 0.0356 macro-F1, with a range of 0.9092--0.9992. Direction changes the conclusion most strongly for speed. Holding out 1000 or 2000 rpm remains near 0.99, whereas holding out 3000 rpm reduces random-forest macro-F1 to 0.6921 and worst-class recall to 0.1099.
 
@@ -201,12 +210,12 @@ Cross-load & Transformer & 0.9076 ± 0.0602 & 0.7981 ± 0.1276 & 3 \\
 \subsection{Fusion-input audit}
 With train-only standardization, strict-254 scalar-branch fusion reaches 0.9939, 0.9723, and 0.9299 mean macro-F1 on source-recording, cross-mode, and cross-load protocols, respectively. It falls to 0.4001 $\pm$ 0.0813 on the 3000-rpm holdout, where its worst-class recall is near zero.
 
-The focused input audit separates signal roles. No-scalar and RPM/load-only branches reach 0.7081 and 0.7124 mean macro-F1, respectively. Auxiliary-26 is shown once in Table~\ref{tab:fusion} to disclose the higher same-holdout result, but its complete four-protocol, per-seed, recording-level, and bootstrap evidence is confined to the Supplementary Material. Because that configuration was selected after viewing the same holdout, it remains hypothesis-generating rather than confirmatory.
+The predefined focused input audit separates signal roles. No-scalar and RPM/load-only branches reach 0.7081 and 0.7124 mean macro-F1, respectively, so nominal RPM/load alone does not materially change the high-speed result under this matched protocol. The 26/28-field bundles were selected after viewing the same holdout; all of their numerical evidence is therefore confined to the Supplementary Material as hypothesis-generating disclosure.
 
 
 \begin{table}[H]
 \centering
-\caption{Focused input-definition audit for the 1000/2000-to-3000-rpm holdout. Values are means and standard deviations across five optimization seeds. The starred auxiliary-26 configuration was identified after inspection of the same holdout and is post-hoc exploratory.}
+\caption{Predefined input-definition audit for the 1000/2000-to-3000-rpm holdout. Values are means and standard deviations across five optimization seeds. Post-hoc 26/28-field configurations are excluded and reported only in the Supplementary Material.}
 \label{tab:fusion}
 \small
 \resizebox{\textwidth}{!}{%
@@ -217,16 +226,33 @@ Configuration & Scalar inputs & Macro-F1 mean ± SD & Worst recall mean ± SD & 
 Vibration-current; no scalars & 0 & 0.7081 ± 0.0986 & 0.4324 ± 0.1507 & Matched protocol \\
 Vibration-current + RPM/load & 2 & 0.7124 ± 0.0529 & 0.4272 ± 0.0964 & Matched protocol \\
 Strict-254 scalar-branch fusion & 254 & 0.4001 ± 0.0813 & 0.0257 ± 0.0045 & Matched protocol \\
-\midrule
-Vibration-current + auxiliary-26* & 26 & 0.9162 ± 0.0245 & 0.8179 ± 0.0593 & Post-hoc exploratory \\
 \bottomrule
 \end{tabular}}
-\vspace{0.3em}\parbox{\textwidth}{\footnotesize * Post-hoc configuration identified after inspection of the same 3000-rpm holdout.}
 \end{table}
 
 
 \subsection{Recording-level evidence and input duration}
-Recording aggregation exposes class-level fragility that window counts can obscure. Strict-254 scalar-branch fusion has zero recording-level worst-class recall on every seed at 3000 rpm. Detailed auxiliary-26 recording results remain in the Supplementary Material because that configuration is post-hoc. All values in Table~\ref{tab:source} are based on 28 test recordings rather than thousands of correlated windows.
+Recording aggregation exposes class-level fragility that window counts can obscure. Table~\ref{tab:classical-source} reports the primary classical model for every predefined protocol. Mean-probability aggregation remains perfect on the predefined source-recording and cross-load tests and reaches 0.9791 macro-F1 for cross-mode transfer. At 3000 rpm, however, it falls to 0.7020 macro-F1 with a worst-class recall of 0.1111; majority voting falls to 0.6444 macro-F1 and zero worst-class recall.
+
+\begin{table}[H]
+\centering
+\caption{Classical source-recording evaluation. Confidence intervals are class-stratified 95\% recording-bootstrap intervals over 2,000 replicates. Majority vote is reported as a sensitivity aggregation.}
+\label{tab:classical-source}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llccccc}
+\toprule
+Protocol & Model & Test recordings & Mean-probability macro-F1 & 95\% interval & Majority-vote macro-F1 & Mean-probability worst recall \\
+\midrule
+Predefined source-recording & XGBoost & 12 & 1.0000 & [1.0000, 1.0000] & 1.0000 & 1.0000 \\
+Cross-mode & Random forest & 42 & 0.9791 & [0.9365, 1.0000] & 0.9791 & 0.9167 \\
+Cross-load & Random forest & 42 & 1.0000 & [1.0000, 1.0000] & 1.0000 & 1.0000 \\
+1000/2000 to 3000 rpm & Random forest & 28 & 0.7020 & [0.6355, 0.8000] & 0.6444 & 0.1111 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+For the corrected neural and fusion models, strict-254 scalar-branch fusion has zero recording-level worst-class recall on every seed at 3000 rpm. All values in Table~\ref{tab:source} are based on 28 test recordings rather than thousands of correlated windows; post-hoc auxiliary-bundle results remain in the Supplementary Material.
 
 
 \begin{table}[H]
@@ -274,6 +300,8 @@ Retained samples & Macro-F1 mean ± SD & Worst recall mean ± SD & Batched infer
 \subsection{What recording grouping establishes}
 Recording grouping removes direct sharing of overlapping windows across data roles. It does not establish independent physical bearing specimens because the public metadata do not provide a verifiable bearing-instance identifier. The protocol is therefore described specifically as recording-grouped, without making a broader leakage-safety claim. Results are limited to the MCC5 bearing-only subset and should not be interpreted as cross-machine validation.
 
+Raw-file hashing further excludes byte-identical recordings, including within the repeated-timestamp group, but it does not resolve shared specimen or session identity. The acquisition-date audit shows substantial class/date association. Because date is not a model input, this does not establish timestamp-driven classification; it instead demonstrates that nuisance session structure may remain embedded in the signals after recording-level separation.
+
 \subsection{Why upward high-speed extrapolation is different}
 The asymmetry among the leave-one-speed-out tests is the central engineering result. Interpolation to 2000 rpm and downward extrapolation to 1000 rpm remain easy for the engineered classical models, but upward extrapolation to 3000 rpm produces class collapse for several otherwise strong models. This is consistent with a support-boundary problem: the test speed lies beyond the training range, and spectral distributions, amplitudes, controller behavior, and signal-to-noise relationships can all change together.
 
@@ -281,23 +309,23 @@ The asymmetry among the leave-one-speed-out tests is the central engineering res
 Frequency-to-order mapping is physically meaningful, yet raw order-band sums and imperfect key-phase estimates do not guarantee a common invariant representation. The exact block results support only a narrow conclusion: nominal-order features offer a small aggregate increment in one configuration, while order-only and full key-phase-order blocks are weak. A stronger order claim requires pulse-quality gating, robust interval filtering, fixed samples per revolution, common-grid interpolation, and density-normalized bands.
 
 \subsection{What the fusion-input audit supports}
-The input audit supports two distinctions. First, strict-254 scalar-branch fusion performs strongly on three protocols with train-only z-score scaling but remains weak on the 3000-rpm holdout; this does not support a general claim that multisource fusion is defective. Second, RPM/load alone does not explain the high post-hoc auxiliary result. The auxiliary-26 input contains two presence indicators and 24 torque/key-phase waveform summaries. These measured signals are plausibly informative, but same-holdout discovery creates selection bias. Independent locked confirmation or nested condition-level selection is needed before presenting that branch as a method contribution.
+The predefined input audit supports two distinctions. First, strict-254 scalar-branch fusion performs strongly on three protocols with train-only z-score scaling but remains weak on the 3000-rpm holdout; this does not support a general claim that multisource fusion is defective. Second, adding RPM/load to the vibration-current branch produces little change under the high-speed protocol. A separate post-hoc audit of stored 26/28-field bundles is disclosed only in the Supplementary Material. Two stored presence indicators are constant here, leaving 24 varying torque/key-phase summaries; same-holdout discovery precludes a confirmatory interpretation regardless of their observed performance.
 
 \subsection{Implications for benchmark reporting}
 MCC5 studies should report the source recording as the split unit, provide transfer direction, distinguish train-seed variability from recording-level uncertainty, list exact input columns, and disclose whether candidate selection touched the test condition. Window-level metrics remain useful for local diagnostic behavior, but they should be accompanied by recording-level results whenever windows overlap.
 
 \section{Limitations}
-The study uses one controlled rig and one bearing subset. Physical specimen identity is not available, severity levels are pooled, and no external machine or independent bearing set is harmonized sufficiently for confirmatory validation. The 26/28-field auxiliary configurations are post-hoc. Neural seed counts are modest, and classical directional experiments use fixed hyperparameters rather than nested optimization. The strict full branch still uses a compact architecture; its 3000-rpm failure does not imply that all fusion strategies will fail.
+The study uses one controlled rig and one bearing subset. Physical specimen identity is not available, severity levels are pooled, and no external machine or independent bearing set is harmonized sufficiently for confirmatory validation. Five acquisition dates are unevenly associated with class (Cramer's V 0.7714), so session confounding cannot be excluded even though dates are not model inputs and source recordings do not cross roles. The 26/28-field auxiliary configurations are post-hoc. Neural seed counts are modest, and classical directional experiments use fixed hyperparameters rather than nested optimization. The strict full branch still uses a compact architecture; its 3000-rpm failure does not imply that all fusion strategies will fail.
 
 The engineered order features do not yet use a fully normalized common order grid, and key-phase quality requires stronger gating. Raw data remain in sensor-voltage units in the processed table. Future work should confirm auxiliary-signal findings on a locked dataset, add a protocol-matched modern domain-generalization baseline, and test independent devices or specimens.
 
 \section{Conclusions}
 This study provides a recording-grouped MCC5 bearing benchmark with explicit operating-shift direction and train-only standardization. Classical models remain strong on source-recording, cross-mode, and cross-load protocols, but repeated partitions qualify the near-perfect single-split result. Upward extrapolation from 1000/2000 to 3000 rpm is the dominant boundary across classical and neural evidence.
 
-The input audit also clarifies the fusion interpretation. Strict-254 scalar-branch fusion is strong on easier protocols but collapses at 3000 rpm. RPM/load alone adds little, whereas auxiliary presence indicators and torque/key-phase waveform summaries are associated with substantially higher performance on the same inspected holdout. Because this configuration was identified post hoc, the result remains hypothesis-generating rather than confirmatory. The contribution is therefore a reproducible directional benchmark and input-definition audit, not proof of specimen independence, universal order invariance, or confirmatory auxiliary-fusion superiority.
+The input audit also clarifies the fusion interpretation. Strict-254 scalar-branch fusion is strong on easier protocols but collapses at 3000 rpm, while RPM/load alone adds little to the vibration-current branch. Post-hoc auxiliary-bundle results are retained only as transparent Supplementary evidence and do not support model superiority. Raw-file and acquisition-date audits further show why recording separation should not be conflated with specimen- or session-independent validation. The contribution is therefore a reproducible directional benchmark and input-definition audit, not proof of specimen independence, universal order invariance, or confirmatory auxiliary-fusion superiority.
 
 \section*{Data Availability Statement}
-The MCC5-THU Motor data are publicly available through the original Mendeley Data record \cite{Chen2025MCC5Mendeley} and are not redistributed. Frozen source-recording split maps, exact input schemas, result tables, and reproduction scripts are included in the accompanying software supplement. A permanent public archive will be added to the accepted version.
+The MCC5-THU Motor data are publicly available through the original Mendeley Data record \cite{Chen2025MCC5Mendeley} and are not redistributed. Versioned code, frozen source-recording split maps, exact input schemas, result tables, reproduction scripts, and a compact raw-file audit containing relative paths, shapes, and SHA-256 digests for all 84 catalogued recordings are publicly available at \url{https://github.com/YOMMMO/mcc5-bearing-paper-review/releases/tag/review-v3.1.3}.
 
 \section*{Author Contributions}
 Yu Li: Conceptualization, methodology, software, validation, formal analysis, investigation, data curation, visualization, writing, and project administration.
@@ -312,7 +340,7 @@ Not applicable. The study uses machinery signals and involves no human or animal
 The author declares no conflict of interest.
 
 \section*{Use of Generative AI}
-During the preparation of this manuscript, the author used OpenAI ChatGPT and OpenAI Codex (service versions accessed in July 2026) for code review, language editing, and document organization. The author reviewed and edited all outputs and takes full responsibility for the content of this publication. All scientific analyses were executed locally, and all numerical claims were checked against saved artifacts.
+During the preparation of this manuscript, the author used OpenAI ChatGPT and OpenAI Codex (service versions accessed in July and August 2026) for code review, language editing, and document organization. The author reviewed and edited all outputs and takes full responsibility for the content of this publication. All scientific analyses were executed locally, and all numerical claims were checked against saved artifacts.
 
 \begin{thebibliography}{99}
 \bibitem{Lei2020Roadmap} Lei, Yaguo; Yang, Bin; Jiang, Xinwei; Jia, Feng; Li, Naipeng; Nandi, Asoke K. Applications of machine learning to machine fault diagnosis: A review and roadmap. Mechanical Systems and Signal Processing. 2020; 138: 106587. doi:\url{10.1016/j.ymssp.2019.106587}.

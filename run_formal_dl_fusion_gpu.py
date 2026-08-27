@@ -25,7 +25,7 @@ from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from src.experiments.exp03_dl_baselines import _make_model
-from src.models.fusion_net import OrderNormalizedMultisourceFusionNet, count_parameters
+from src.models.fusion_net import MultisourceFusionNet, count_parameters
 from src.signal.preprocessing import resample_or_pad
 from src.utils.io import ensure_dir
 from src.utils.metrics import classification_metrics, save_confusion_matrix, save_per_class_metrics
@@ -814,7 +814,7 @@ def train_fusion_one(
     y_test = arrays["y_test"]
     labels = arrays["labels"]
     num_classes = len(labels)
-    model = OrderNormalizedMultisourceFusionNet(
+    model = MultisourceFusionNet(
         int(arrays["vib_ch"]),
         int(arrays["cur_ch"]),
         int(arrays["scal_train"].shape[1]),
@@ -882,7 +882,7 @@ def train_fusion_one(
         labels,
         ensure_dir(paths.root / "predictions") / f"{prefix}_predictions.csv",
         split_name=split_name,
-        model="OrderNormalizedMultisourceFusionNet",
+        model="MultisourceFusionNet",
         setting=setting,
         seed=seed,
     )
@@ -915,7 +915,7 @@ def train_fusion_one(
         "split_name": split_name,
         "split_file": split_file,
         "seed": seed,
-        "model": "OrderNormalizedMultisourceFusionNet",
+        "model": "MultisourceFusionNet",
         "setting": setting,
         **metrics,
         "epochs_ran": epochs_ran,
@@ -980,7 +980,7 @@ def write_model_summary(paths: RunPaths, fusion_rows: pd.DataFrame) -> None:
         return
     row = fusion_rows.iloc[0]
     lines = [
-        "OrderNormalizedMultisourceFusionNet formal summary",
+        "MultisourceFusionNet formal summary",
         f"run_id: {paths.run_id}",
         f"parameter_count: {row.get('parameter_count')}",
         f"scalar_feature_count: {row.get('scalar_feature_count')}",

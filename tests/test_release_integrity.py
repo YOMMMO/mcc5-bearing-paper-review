@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import hashlib
 import unittest
 from pathlib import Path
 
@@ -19,12 +21,26 @@ class ReleaseIntegrityTests(unittest.TestCase):
             "CITATION.cff",
             "review/REVIEW_GUIDE.md",
             "review/CLAIM_EVIDENCE_MAP.md",
+            "review/SESSION_CONFOUNDING_AUDIT.md",
+            "review/RUN_PROVENANCE_MANIFEST.json",
             "data/recording_catalog_and_splits.csv",
+            "data/RAW_DATA_PROVENANCE.md",
             "evidence/raw_summary.csv",
             "evidence/fusion_summary.csv",
             "evidence/all_fusion_input_protocol_results.csv",
             "evidence/severity_stratified_recording_metrics_summary.csv",
             "evidence/per_recording_probability_audit.csv",
+            "evidence/raw_file_integrity_audit.csv",
+            "evidence/raw_integrity_summary.json",
+            "evidence/timestamp_collision_audit.csv",
+            "evidence/same_timestamp_pair_comparison.csv",
+            "evidence/session_metadata_audit.csv",
+            "evidence/acquisition_date_class_counts.csv",
+            "evidence/acquisition_date_protocol_role_counts.csv",
+            "evidence/session_confounding_summary.json",
+            "evidence/classical_source_recording_metrics.csv",
+            "evidence/classical_source_recording_bootstrap.csv",
+            "evidence/classical_source_recording_predictions.csv",
             "paper/main.tex",
             "paper/supplementary.tex",
         ]
@@ -63,6 +79,59 @@ class ReleaseIntegrityTests(unittest.TestCase):
         self.assertFalse(strict.empty)
         self.assertEqual(set(strict["evidence_status"]), {"corrected_formal_train_only_zscore"})
 
+    def test_raw_integrity_audit_excludes_exact_duplicates(self) -> None:
+        audit = pd.read_csv(ROOT / "evidence/raw_file_integrity_audit.csv")
+        self.assertEqual(len(audit), 84)
+        self.assertEqual(audit["recording_id"].nunique(), 84)
+        self.assertEqual(audit["sha256"].nunique(), 84)
+        self.assertFalse(audit["exact_duplicate_content"].astype(bool).any())
+        self.assertEqual(set(audit["data_row_count"]), {1_152_000})
+        self.assertEqual(set(audit["column_count"]), {9})
+
+        collisions = pd.read_csv(ROOT / "evidence/timestamp_collision_audit.csv")
+        self.assertEqual(len(collisions), 1)
+        self.assertEqual(int(collisions.iloc[0]["recording_count"]), 3)
+        self.assertTrue(bool(collisions.iloc[0]["all_file_hashes_unique"]))
+        comparisons = pd.read_csv(ROOT / "evidence/same_timestamp_pair_comparison.csv")
+        self.assertEqual(len(comparisons), 3)
+        self.assertFalse(comparisons["sha256_equal"].astype(bool).any())
+        self.assertFalse(comparisons["signal_values_equal"].astype(bool).any())
+        self.assertTrue(comparisons["time_axis_equal"].astype(bool).all())
+
+    def test_session_audit_is_descriptive(self) -> None:
+        summary = json.loads(
+            (ROOT / "evidence/session_confounding_summary.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(int(summary["recording_count"]), 84)
+        self.assertIn("Descriptive association only", str(summary["interpretation"]))
+        self.assertAlmostEqual(float(summary["date_majority_accuracy_in_sample"]), 61 / 84)
+        self.assertGreater(float(summary["cramers_v_date_vs_class"]), 0.7)
+
+    def test_classical_recording_metrics_cover_all_protocols(self) -> None:
+        metrics = pd.read_csv(ROOT / "evidence/classical_source_recording_metrics.csv")
+        self.assertEqual(
+            set(metrics["split"]),
+            {"source_file", "cross_condition", "cross_load", "cross_rpm"},
+        )
+        self.assertEqual(set(metrics["aggregation"]), {"mean_probability", "majority_vote"})
+        cross_rpm = metrics[
+            (metrics["split"] == "cross_rpm")
+            & (metrics["aggregation"] == "mean_probability")
+        ].iloc[0]
+        self.assertAlmostEqual(float(cross_rpm["macro_f1"]), 0.7019607843137254)
+        self.assertAlmostEqual(float(cross_rpm["worst_class_recall"]), 1 / 9)
+
+    def test_posthoc_auxiliary_result_is_not_in_the_abstract(self) -> None:
+        main = (ROOT / "paper/main.tex").read_text(encoding="utf-8")
+        abstract = main.split("\\begin{abstract}", 1)[1].split("\\end{abstract}", 1)[0]
+        self.assertNotIn("auxiliary-26", abstract)
+        self.assertNotIn("0.9162", abstract)
+
+        machines = (ROOT / "paper/main_machines.tex").read_text(encoding="utf-8")
+        machines_abstract = machines.split("\\abstract{", 1)[1].split("}\n", 1)[0]
+        self.assertNotIn("auxiliary-26", machines_abstract)
+        self.assertNotIn("0.9162", machines_abstract)
+
     def test_public_manuscripts_exclude_internal_instructions(self) -> None:
         forbidden = [
             "must remain future tense",
@@ -71,11 +140,21 @@ class ReleaseIntegrityTests(unittest.TestCase):
             "Decision C",
             "GPT Pro",
             "E:\\thesis2",
+            "must be confirmed before submission",
+            "must be regenerated",
         ]
-        for relative in ["paper/main.tex", "paper/supplementary.tex"]:
+        for relative in ["paper/main.tex", "paper/main_machines.tex", "paper/supplementary.tex"]:
             content = (ROOT / relative).read_text(encoding="utf-8")
             for phrase in forbidden:
                 self.assertNotIn(phrase, content, f"{relative}: {phrase}")
+
+    def test_run_provenance_sha256_anchors(self) -> None:
+        manifest = json.loads(
+            (ROOT / "review/RUN_PROVENANCE_MANIFEST.json").read_text(encoding="utf-8")
+        )
+        for relative, expected in manifest["sha256_anchors"].items():
+            payload = (ROOT / relative).read_bytes()
+            self.assertEqual(hashlib.sha256(payload).hexdigest(), expected, relative)
 
 
 if __name__ == "__main__":

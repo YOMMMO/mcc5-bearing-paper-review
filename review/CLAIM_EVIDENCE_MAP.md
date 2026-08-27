@@ -4,6 +4,9 @@
 |---|---|---|
 | 84 recordings, 15,036 windows, four fault-location classes | `paper/main.pdf`, Table 1; `data/recording_catalog_and_splits.csv` | `evidence/split.csv` |
 | Zero recording overlap across frozen neural roles | `data/recording_catalog_and_splits.csv` | `evidence/split.csv`; `tests/test_release_integrity.py` |
+| All 84 catalogued raw files resolve and have distinct SHA-256 digests | `evidence/raw_file_integrity_audit.csv`; `evidence/raw_integrity_summary.json` | `src/data/audit_mcc5_provenance.py`; `data/RAW_DATA_PROVENANCE.md` |
+| The only repeated acquisition timestamp does not identify byte- or signal-identical recordings | `evidence/timestamp_collision_audit.csv`; `evidence/same_timestamp_pair_comparison.csv` | `src/data/audit_mcc5_provenance.py` |
+| Acquisition date is associated with class composition, indicating residual session-confounding risk | `evidence/acquisition_date_class_counts.csv`; `evidence/session_confounding_summary.json` | `evidence/session_metadata_audit.csv`; `review/SESSION_CONFOUNDING_AUDIT.md` |
 | Predefined source-recording XGBoost macro-F1 = 0.9964 | `evidence/directional.csv` | `paper/main.pdf`, Table 3 |
 | Ten grouped partitions: XGBoost 0.9777 +/- 0.0356 | `evidence/repeated.csv`; `evidence/repeated_by_split.csv` | `evidence/repeated_partition_manifest.csv` |
 | Directional cross-mode, cross-load, and leave-one-speed findings | `evidence/directional.csv` | `paper/main.pdf`, Figure 2 and Table 3 |
@@ -13,8 +16,9 @@
 | Corrected strict engineered and fusion-input results | `evidence/fusion_summary.csv`; `evidence/fusion.csv` | `evidence/all_fusion_input_protocol_results.csv`; `schemas/` |
 | Auxiliary-26/28 are post-hoc exploratory | `evidence/fusion_summary.csv` evidence-status field | `paper/supplementary.pdf`; `tests/test_release_integrity.py` |
 | RPM/load alone does not explain the higher same-holdout auxiliary association | `evidence/deltas.csv`; `evidence/fusion_summary.csv` | `paper/main.pdf`, Table 5 |
-| Recording-level performance and worst-class recall | `evidence/source_summary.csv`; `evidence/source.csv` | `evidence/per_recording_probability_audit.csv` |
-| Recording-cluster uncertainty intervals | `evidence/bootstrap.csv`; `evidence/classical_bootstrap.csv` | `paper/supplementary.pdf`, Table S6 |
+| Recording-level neural/fusion performance and worst-class recall | `evidence/source_summary.csv`; `evidence/source.csv` | `evidence/per_recording_probability_audit.csv` |
+| Recording-level classical performance under all four primary protocols | `evidence/classical_source_recording_metrics.csv`; `evidence/classical_source_recording_predictions.csv` | `src/experiments/exp38_classical_recording_metrics.py` |
+| Recording-cluster uncertainty intervals | `evidence/bootstrap.csv`; `evidence/classical_bootstrap.csv`; `evidence/classical_source_recording_bootstrap.csv` | `paper/supplementary.pdf` |
 | Input-length sensitivity | `evidence/length.csv` | `paper/main.pdf`, Table 7 |
 | Severity analysis is descriptive only | `evidence/severity_stratified_recording_metrics_summary.csv` | `paper/supplementary.pdf`, Table S5 |
 | Manuscript numbers, titles, evidence labels, and release identity are synchronized | `evidence/submission_consistency_audit.md` | `evidence/submission_consistency_audit.json` |

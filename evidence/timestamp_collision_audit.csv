@@ -1,0 +1,2 @@
+acquisition_timestamp,recording_count,unique_sha256_count,all_file_hashes_unique,recording_ids_json
+250708094556,3,3,True,"[""mcc5_000037_bearing_outer_L_speed_circulation_20Nm_1000rpm_250708094556"", ""mcc5_000040_bearing_outer_L_speed_circulation_40Nm_1000rpm_250708094556"", ""mcc5_000186_bearing_outer_L_torque_circulation_40Nm_3000rpm_250708094556d""]"

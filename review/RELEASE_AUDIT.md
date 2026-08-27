@@ -8,18 +8,23 @@ Repository: https://github.com/YOMMMO/mcc5-bearing-paper-review
 
 - 84 acquisition recordings represented once each in the compact catalog.
 - Four frozen protocol roles included at recording level.
-- 24 evidence CSV files included.
+- 30 evidence CSV files included.
 - Current manuscript, Supplementary Material, `Machines` preview, and figure sources included.
 - Exact input schemas, relevant source code, tests, and environment records included.
+- Official `Machines` template dependencies included under `paper/Definitions/` so the preview source builds without a separate template download.
 - Raw signals, checkpoints, processed windows, duplicate per-window role maps, caches, build products, and historical drafts excluded.
 
 ## Validation Performed Before Upload
 
-- Seven unit/integrity tests passed.
+- Twelve unit and release-integrity tests passed.
 - Every included CSV parsed successfully.
 - Publication-class counts verified: 24 rolling-element, 23 inner-race, 25 outer-race, and 12 healthy recordings.
 - Every protocol contains train, validation, and test roles.
 - Auxiliary-26/28 evidence-status labels verified as `posthoc_exploratory_same_holdout`.
+- All 84 catalogued raw files resolved, had the expected 1,152,000-by-9 shape, and had distinct SHA-256 digests.
+- The sole repeated acquisition timestamp was audited by streaming pairwise comparison: the three files share their time vector but differ in all eight signal columns.
+- Acquisition-date/class and acquisition-date/protocol-role cross-tabs were generated as a descriptive session-confounding audit.
+- Mean-probability and majority-vote source-recording metrics were generated for all four classical protocols, with class-stratified recording bootstrap intervals.
 - No local absolute workspace or user-profile path found in publication files.
 - No GitHub token, common access-key pattern, or private-key header found.
 - No raw-data directory, checkpoint file, or file larger than 10 MiB included.
@@ -28,3 +33,5 @@ Repository: https://github.com/YOMMMO/mcc5-bearing-paper-review
 ## Evidence Boundary
 
 This repository is sufficient for manuscript and compact evidence review. A full numerical rerun additionally requires the separately hosted MCC5 raw dataset. The repository does not establish physical-bearing specimen independence or cross-machine generalization.
+
+Formal-run and follow-up-audit provenance are separated in `review/RUN_PROVENANCE_MANIFEST.json`.

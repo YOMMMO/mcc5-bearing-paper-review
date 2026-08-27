@@ -26,8 +26,12 @@ class _Branch(nn.Module):
         return self.net(x).squeeze(-1)
 
 
-class OrderNormalizedMultisourceFusionNet(nn.Module):
-    """Small vibration/current/scalar fusion classifier."""
+class MultisourceFusionNet(nn.Module):
+    """Small vibration/current/scalar fusion classifier.
+
+    Any order-related scalar features are prepared upstream. The network does
+    not itself perform angular resampling or order normalization.
+    """
 
     def __init__(
         self,
@@ -83,7 +87,7 @@ def count_parameters(model: nn.Module) -> int:
 
 def save_model_summary(path: str | Path = "results/logs/model_summary.txt") -> None:
     """Run a forward smoke test and save a model summary."""
-    model = OrderNormalizedMultisourceFusionNet(3, 3, 16, 4)
+    model = MultisourceFusionNet(3, 3, 16, 4)
     vib = torch.zeros(2, 3, 8192)
     cur = torch.zeros(2, 3, 8192)
     scal = torch.zeros(2, 16)
@@ -93,7 +97,7 @@ def save_model_summary(path: str | Path = "results/logs/model_summary.txt") -> N
     p.write_text(
         "\n".join(
             [
-                "OrderNormalizedMultisourceFusionNet",
+                "MultisourceFusionNet",
                 f"parameters: {count_parameters(model)}",
                 f"forward_output_shape: {tuple(logits.shape)}",
             ]
@@ -104,3 +108,7 @@ def save_model_summary(path: str | Path = "results/logs/model_summary.txt") -> N
 
 if __name__ == "__main__":
     save_model_summary()
+
+
+# Backward-compatible alias for archived run scripts and checkpoint metadata.
+OrderNormalizedMultisourceFusionNet = MultisourceFusionNet

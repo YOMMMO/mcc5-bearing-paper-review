@@ -19,7 +19,7 @@ try:
     from torch.utils.data import DataLoader, TensorDataset
 
     from src.experiments.exp03_dl_baselines import _device, _stack
-    from src.models.fusion_net import OrderNormalizedMultisourceFusionNet, save_model_summary
+    from src.models.fusion_net import MultisourceFusionNet, save_model_summary
 
     FUSION_DEPS_AVAILABLE = True
     FUSION_IMPORT_ERROR: Exception | None = None
@@ -29,7 +29,7 @@ except Exception as exc:  # pragma: no cover - depends on installed packages
     nn = None
     DataLoader = None
     TensorDataset = None
-    OrderNormalizedMultisourceFusionNet = None
+    MultisourceFusionNet = None
     save_model_summary = None
     FUSION_DEPS_AVAILABLE = False
     FUSION_IMPORT_ERROR = exc
@@ -164,7 +164,7 @@ def main(argv: list[str] | None = None) -> int:
     y_val = val_df["label_group"].astype(str).map(label_to_idx).to_numpy()
     y_test = test_df["label_group"].astype(str).map(label_to_idx).to_numpy()
     device = _device(cfg.get("device", "auto"))
-    model = OrderNormalizedMultisourceFusionNet(vib_ch, cur_ch, scal_train.shape[1], len(labels)).to(device)
+    model = MultisourceFusionNet(vib_ch, cur_ch, scal_train.shape[1], len(labels)).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=float(cfg.get("learning_rate", 1e-3)), weight_decay=float(cfg.get("weight_decay", 1e-4)))
     class_weights = None
     if cfg.get("use_class_weights", True):
