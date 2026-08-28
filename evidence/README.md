@@ -11,6 +11,13 @@ The CSV files in this directory are the compact outputs used to generate manuscr
 - `bootstrap.csv`
 - `classical_source_recording_metrics.csv`
 - `classical_source_recording_bootstrap.csv`
+- `classical_source_recording_model_matrix_metrics.csv`
+- `classical_source_recording_model_matrix_bootstrap.csv`
+- `repeated_source_recording_metrics.csv`
+- `partition_leakage_controls_summary.csv`
+- `within_date_250707_summary.csv`
+- `training_only_metadata_baselines.csv`
+- `outer_race_date_summary.csv`
 - `raw_file_integrity_audit.csv`
 - `timestamp_collision_audit.csv`
 - `same_timestamp_pair_comparison.csv`
@@ -19,4 +26,4 @@ The CSV files in this directory are the compact outputs used to generate manuscr
 - `acquisition_date_protocol_role_counts.csv`
 - `submission_consistency_audit.md`
 
-`raw_integrity_summary.json` and `session_confounding_summary.json` provide compact machine-readable summaries. The raw audit contains hashes and metadata only; no raw signal samples are redistributed. Files ending in detailed per-seed or per-recording rows support deeper verification. See `review/CLAIM_EVIDENCE_MAP.md` for the intended mapping.
+`raw_integrity_summary.json` and `session_confounding_summary.json` provide compact machine-readable summaries. The raw audit contains hashes and metadata only; no raw signal samples are redistributed. Detailed prediction files support verification of aggregation and control analyses. See `review/CLAIM_EVIDENCE_MAP.md` for the intended mapping.

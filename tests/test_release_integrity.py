@@ -41,6 +41,13 @@ class ReleaseIntegrityTests(unittest.TestCase):
             "evidence/classical_source_recording_metrics.csv",
             "evidence/classical_source_recording_bootstrap.csv",
             "evidence/classical_source_recording_predictions.csv",
+            "evidence/classical_source_recording_model_matrix_metrics.csv",
+            "evidence/repeated_source_recording_metrics.csv",
+            "evidence/partition_leakage_controls.csv",
+            "evidence/partition_leakage_controls_summary.csv",
+            "evidence/training_only_metadata_baselines.csv",
+            "evidence/within_date_250707_summary.csv",
+            "evidence/outer_race_date_summary.csv",
             "paper/main.tex",
             "paper/supplementary.tex",
         ]
@@ -121,6 +128,52 @@ class ReleaseIntegrityTests(unittest.TestCase):
         self.assertAlmostEqual(float(cross_rpm["macro_f1"]), 0.7019607843137254)
         self.assertAlmostEqual(float(cross_rpm["worst_class_recall"]), 1 / 9)
 
+    def test_classical_recording_matrix_and_repeated_partitions(self) -> None:
+        matrix = pd.read_csv(
+            ROOT / "evidence/classical_source_recording_model_matrix_metrics.csv"
+        )
+        self.assertEqual(matrix["split"].nunique(), 4)
+        self.assertEqual(matrix["model"].nunique(), 5)
+        self.assertEqual(set(matrix["aggregation"]), {"mean_probability", "majority_vote"})
+        self.assertEqual(len(matrix), 4 * 5 * 2)
+
+        repeated = pd.read_csv(ROOT / "evidence/repeated_source_recording_metrics.csv")
+        self.assertEqual(set(repeated["split_seed"]), set(range(42, 52)))
+        self.assertEqual(set(repeated["model"]), {"random_forest", "xgboost"})
+        self.assertEqual(set(repeated["aggregation"]), {"mean_probability", "majority_vote"})
+        self.assertEqual(set(repeated["source_recording_count"]), {12})
+
+    def test_partition_and_session_proxy_controls(self) -> None:
+        partition = pd.read_csv(ROOT / "evidence/partition_leakage_controls.csv")
+        self.assertEqual(set(partition["split_seed"]), set(range(42, 52)))
+        self.assertEqual(partition["protocol"].nunique(), 4)
+        random_rows = partition[~partition["recording_grouped"].astype(bool)]
+        grouped_rows = partition[partition["recording_grouped"].astype(bool)]
+        self.assertTrue((random_rows["source_recording_overlap"] == 84).all())
+        self.assertTrue((grouped_rows["source_recording_overlap"] == 0).all())
+        self.assertTrue(grouped_rows["recording_metric_valid"].astype(bool).all())
+        self.assertFalse(random_rows["recording_metric_valid"].astype(bool).any())
+
+        metadata = pd.read_csv(ROOT / "evidence/training_only_metadata_baselines.csv")
+        self.assertEqual(set(metadata["fit_scope"]), {"training_recordings_only"})
+        self.assertEqual(metadata["split"].nunique(), 4)
+        date_only = metadata[
+            (metadata["feature_set"] == "date_only")
+            & (metadata["model"] == "logistic_regression")
+        ]
+        self.assertEqual(len(date_only), 4)
+        self.assertGreater(float(date_only["macro_f1"].min()), 0.65)
+
+        within_date = pd.read_csv(ROOT / "evidence/within_date_250707_summary.csv")
+        self.assertEqual(set(within_date["macro_f1_mean"]), {1.0})
+        outer_date = pd.read_csv(ROOT / "evidence/outer_race_date_summary.csv")
+        xgb = outer_date[
+            (outer_date["feature_set"] == "all_signals_without_order")
+            & (outer_date["model"] == "xgboost")
+            & (outer_date["aggregation"] == "mean_probability")
+        ].iloc[0]
+        self.assertGreater(float(xgb["accuracy_mean"]), 0.8)
+
     def test_posthoc_auxiliary_result_is_not_in_the_abstract(self) -> None:
         main = (ROOT / "paper/main.tex").read_text(encoding="utf-8")
         abstract = main.split("\\begin{abstract}", 1)[1].split("\\end{abstract}", 1)[0]
@@ -138,7 +191,6 @@ class ReleaseIntegrityTests(unittest.TestCase):
             "corrected run identifier",
             "centered-only predecessor",
             "Decision C",
-            "GPT Pro",
             "E:\\thesis2",
             "must be confirmed before submission",
             "must be regenerated",
@@ -148,6 +200,20 @@ class ReleaseIntegrityTests(unittest.TestCase):
             for phrase in forbidden:
                 self.assertNotIn(phrase, content, f"{relative}: {phrase}")
 
+    def test_public_package_is_neutral_and_has_no_review_prompt(self) -> None:
+        self.assertFalse((ROOT / "review/GPT_PRO_REVIEW_PROMPT.md").exists())
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertNotIn("GPT Pro", readme)
+        self.assertNotIn("prepared prompt", readme)
+
+    def test_publication_facing_ai_disclosure_is_specific(self) -> None:
+        for relative in ["paper/main.tex", "paper/main_machines.tex"]:
+            content = (ROOT / relative).read_text(encoding="utf-8")
+            self.assertIn("OpenAI ChatGPT Pro", content, relative)
+            self.assertIn("OpenAI Codex", content, relative)
+            self.assertIn("did not generate or alter the raw measurements", content, relative)
+            self.assertIn("takes full responsibility", content, relative)
+
     def test_run_provenance_sha256_anchors(self) -> None:
         manifest = json.loads(
             (ROOT / "review/RUN_PROVENANCE_MANIFEST.json").read_text(encoding="utf-8")
@@ -155,6 +221,39 @@ class ReleaseIntegrityTests(unittest.TestCase):
         for relative, expected in manifest["sha256_anchors"].items():
             payload = (ROOT / relative).read_bytes()
             self.assertEqual(hashlib.sha256(payload).hexdigest(), expected, relative)
+
+    def test_current_submission_consistency_audit_passes(self) -> None:
+        audit = json.loads(
+            (ROOT / "evidence/submission_consistency_audit.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(audit["package_version"], "3.1.4")
+        self.assertEqual(audit["overall_status"], "PASS")
+        self.assertEqual(int(audit["failure_count"]), 0)
+        self.assertEqual(int(audit["check_count"]), 28)
+
+    def test_release_version_alignment(self) -> None:
+        self.assertIn("review-v3.1.4", (ROOT / "README.md").read_text(encoding="utf-8"))
+        self.assertIn("version: 3.1.4", (ROOT / "CITATION.cff").read_text(encoding="utf-8"))
+        self.assertIn('version = "3.1.4"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+        provenance = json.loads(
+            (ROOT / "review/RUN_PROVENANCE_MANIFEST.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(provenance["package_version"], "review-v3.1.4")
+
+    def test_artifact_manifest_hashes(self) -> None:
+        manifest = pd.read_csv(ROOT / "review/ARTIFACT_MANIFEST_SHA256.csv")
+        self.assertGreater(len(manifest), 180)
+        self.assertTrue(manifest["path"].is_unique)
+        for row in manifest.itertuples(index=False):
+            path = ROOT / str(row.path)
+            self.assertTrue(path.is_file(), str(row.path))
+            self.assertEqual(
+                hashlib.sha256(path.read_bytes()).hexdigest(),
+                str(row.sha256),
+                str(row.path),
+            )
 
 
 if __name__ == "__main__":

@@ -1,18 +1,18 @@
-# MCC5 Bearing Paper Review Package
+# MCC5 Recording-Grouped Bearing Benchmark Software Supplement
 
 This repository contains the minimal manuscript, evidence, and reproducibility materials needed to review:
 
 **Recording-Grouped Bearing Fault Diagnosis under Directional Operating-Condition Shifts on the MCC5 Electric-Drive Benchmark**
 
-The package is intended for scientific peer review, including review with GPT Pro. It deliberately excludes raw sensor recordings, model checkpoints, caches, build products, duplicate window-level split files, and historical manuscript versions.
+The repository is a compact software and evidence supplement for the manuscript. It deliberately excludes raw sensor recordings, model checkpoints, caches, build products, duplicate window-level split files, and historical manuscript versions.
 
 ## Start Here
 
 1. Read the [main manuscript](paper/main.pdf).
 2. Read the [Supplementary Material](paper/supplementary.pdf).
-3. Use the [review guide](review/REVIEW_GUIDE.md) to understand the evidence hierarchy.
+3. Use the [evidence guide](review/REVIEW_GUIDE.md) to understand the evidence hierarchy.
 4. Follow the [claim-to-evidence map](review/CLAIM_EVIDENCE_MAP.md) when checking numerical statements.
-5. Paste [this prepared prompt](review/GPT_PRO_REVIEW_PROMPT.md) into GPT Pro and provide the repository URL.
+5. Run the [release-integrity tests](tests/test_release_integrity.py) before using the tabulated evidence.
 
 ## Included
 
@@ -21,8 +21,9 @@ The package is intended for scientific peer review, including review with GPT Pr
 - Publication figures in PDF and PNG.
 - Recording-level catalog and frozen train/validation/test roles for all four protocols.
 - Raw-file SHA-256/shape audit and deep comparison of repeated acquisition timestamps (without redistributing raw signals).
-- Acquisition-date/class cross-tabs documenting residual session-confounding risk.
-- Classical source-recording probability aggregation, majority vote, and clustered bootstrap evidence.
+- Acquisition-date/class cross-tabs, same-date diagnosis, metadata-only baselines, and within-class date-prediction controls documenting residual session-confounding risk.
+- Matched random-window, nonoverlapping-window, and recording-grouped partition controls.
+- Complete five-model by four-protocol classical source-recording matrix, repeated grouped partitions, majority vote, and clustered bootstrap evidence.
 - All compact evidence tables used to support the manuscript's numerical claims.
 - Exact scalar-input schemas and feature-membership definitions.
 - Train-only normalization, model, metric, preprocessing, and experiment code.
@@ -47,7 +48,8 @@ The formal MCC5 data article is [Chen et al., Data in Brief 65 (2026), 112583](h
 - The 26 stored auxiliary fields comprise 24 varying torque/key-phase summaries and two constant modality-presence indicators in this complete-modality subset.
 - Recording separation does not establish independent physical bearing specimens.
 - All 84 catalogued raw files have distinct SHA-256 hashes. This excludes byte-identical recordings, but it does not establish specimen or acquisition-session independence.
-- Acquisition date is associated with class composition and is reported as a descriptive confounding audit, not as diagnostic performance.
+- Same-date three-class diagnosis remains perfect under grouped splits, so date cannot by itself explain all discrimination. However, training-only date metadata predicts labels and within-class signals predict acquisition date above balanced chance; residual session-proxy confounding therefore remains unresolved.
+- Recording-level results are supplied for all five classical models under all four predefined protocols and for ten repeated grouped source-recording partitions.
 - The paper does not claim cross-machine or non-MCC5 generalization.
 
 ## Compact Data Representation
@@ -61,11 +63,11 @@ python -m compileall -q src tests run_formal_dl_fusion_gpu.py run_postfix_neural
 python -m unittest discover -s tests -v
 ```
 
-Full experiment reproduction additionally requires the raw MCC5 dataset. The compact raw-file audit can be rebuilt with `src/data/audit_mcc5_provenance.py`, and classical source-recording metrics with `src/experiments/exp38_classical_recording_metrics.py`. See [data/README.md](data/README.md).
+Full experiment reproduction additionally requires the raw MCC5 dataset. The compact raw-file audit can be rebuilt with `src/data/audit_mcc5_provenance.py`, classical source-recording metrics with `src/experiments/exp38_classical_recording_metrics.py`, and partition/session-proxy controls with `src/experiments/exp39_peer_review_controls.py`. See [data/README.md](data/README.md).
 
-## Versioned Review Snapshot
+## Versioned Snapshot
 
-The tagged [review package release](https://github.com/YOMMMO/mcc5-bearing-paper-review/releases/tag/review-v3.1.3) attaches a versioned snapshot of the compact review package together with the main and supplementary PDFs. Use the repository itself for browsing and the release ZIP when a reviewer needs one versioned download.
+The tagged [software supplement release](https://github.com/YOMMMO/mcc5-bearing-paper-review/releases/tag/review-v3.1.4) attaches a versioned snapshot together with the main and supplementary PDFs. Use the repository for browsing and the release ZIP for one immutable download.
 
 ## License
 

@@ -6,7 +6,8 @@
 - Recording-level provenance, labels, conditions, and frozen roles.
 - Compact raw-file hashes/shapes and acquisition-session metadata audits, without signal redistribution.
 - Result summaries, per-seed evidence, bootstrap outputs, and input-definition audits.
-- Classical probability aggregation and majority-vote results at source-recording level.
+- Complete classical probability aggregation and majority-vote results at source-recording level for five models and four protocols.
+- Direct partition controls and session-proxy sensitivity experiments.
 - Exact feature schemas and preprocessing/model code.
 - Tests for train-only normalization, evidence labels, and recording-grouped roles.
 - Environment and dependency records.
@@ -21,4 +22,4 @@
 - Earlier drafts and internal reviewer conversations.
 - Other datasets that the manuscript does not claim as external validation.
 
-This selection keeps the repository small enough for direct inspection while retaining every artifact needed to challenge the paper's central claims.
+This selection keeps the repository small enough for direct inspection while retaining the artifacts needed to evaluate the paper's central claims.

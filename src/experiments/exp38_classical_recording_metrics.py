@@ -13,12 +13,12 @@ from sklearn.preprocessing import LabelEncoder
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from src.experiments.exp02_ml_baselines import _feature_matrix
+from src.experiments.exp02_ml_baselines import _feature_matrix, _models
 from src.experiments.exp34_comprehensive_review_audit import (
     exact_groups,
     feature_block,
-    make_model,
     majority_vote,
+    source_file_split,
 )
 from src.utils.metrics import classification_metrics
 from src.utils.tables import read_table
@@ -30,6 +30,14 @@ PRIMARY_MODELS = {
     "cross_load": "random_forest",
     "cross_rpm": "random_forest",
 }
+
+ALL_MODELS = [
+    "logistic_regression",
+    "svm",
+    "random_forest",
+    "mlp",
+    "xgboost",
+]
 
 
 def _fit_probability_table(
@@ -46,18 +54,19 @@ def _fit_probability_table(
     x_test = _feature_matrix(test).reindex(columns=x_train.columns, fill_value=np.nan)
     y_train = train["label_group"].astype(str)
     labels = sorted(pd.concat([y_train, test["label_group"].astype(str)]).unique())
-    model = make_model(model_name, seed)
-
-    if model_name == "xgboost":
-        encoder = LabelEncoder()
-        encoded = encoder.fit_transform(y_train)
-        model.fit(x_train, encoded)
-        probabilities = model.predict_proba(x_test)
-        probability_labels = [str(label) for label in encoder.classes_]
-    else:
-        model.fit(x_train, y_train)
-        probabilities = model.predict_proba(x_test)
-        probability_labels = [str(label) for label in model.named_steps["model"].classes_]
+    models = _models(seed)
+    if model_name not in models:
+        raise RuntimeError(f"Classical model is unavailable: {model_name}")
+    model = models[model_name]
+    if model_name == "svm":
+        # Probability aggregation requires calibrated class probabilities. Enabling
+        # libsvm probability estimation does not alter the SVC decision boundary.
+        model.set_params(model__probability=True)
+    encoder = LabelEncoder()
+    encoded = encoder.fit_transform(y_train)
+    model.fit(x_train, encoded)
+    probabilities = model.predict_proba(x_test)
+    probability_labels = [str(label) for label in encoder.classes_]
 
     table = test[
         ["window_id", "source_file", "label_group", "condition_type", "rpm_nominal", "load_nm"]
@@ -180,45 +189,99 @@ def main(argv: list[str] | None = None) -> int:
     all_sources: list[pd.DataFrame] = []
     all_metrics: list[pd.DataFrame] = []
     bootstrap_rows: list[dict[str, object]] = []
-    for split_name, model_name in PRIMARY_MODELS.items():
+    for split_name in PRIMARY_MODELS:
         split_path = split_dir / f"mcc5_formal_{split_name}_split.csv"
-        window_table, labels = _fit_probability_table(
-            features, pd.read_csv(split_path), columns, model_name, args.seed
-        )
-        source_table, metrics = _aggregate_recordings(
-            window_table, labels, split_name, model_name
-        )
-        all_sources.append(source_table)
-        all_metrics.append(metrics)
-        for row in metrics.to_dict(orient="records"):
-            prediction_column = (
-                "mean_probability_prediction"
-                if row["aggregation"] == "mean_probability"
-                else "majority_vote_prediction"
+        split = pd.read_csv(split_path)
+        for model_name in ALL_MODELS:
+            window_table, labels = _fit_probability_table(
+                features, split, columns, model_name, args.seed
             )
-            bootstrap_rows.append(
-                {
-                    **row,
-                    "bootstrap_unit": "source_recording",
-                    "bootstrap_replicates": args.bootstrap,
-                    **_stratified_bootstrap(
-                        source_table,
-                        prediction_column,
-                        labels,
-                        args.seed,
-                        args.bootstrap,
-                    ),
-                }
+            source_table, metrics = _aggregate_recordings(
+                window_table, labels, split_name, model_name
             )
+            all_sources.append(source_table)
+            all_metrics.append(metrics)
+            for row in metrics.to_dict(orient="records"):
+                prediction_column = (
+                    "mean_probability_prediction"
+                    if row["aggregation"] == "mean_probability"
+                    else "majority_vote_prediction"
+                )
+                bootstrap_rows.append(
+                    {
+                        **row,
+                        "bootstrap_unit": "source_recording",
+                        "bootstrap_replicates": args.bootstrap,
+                        **_stratified_bootstrap(
+                            source_table,
+                            prediction_column,
+                            labels,
+                            args.seed,
+                            args.bootstrap,
+                        ),
+                    }
+                )
 
-    pd.concat(all_sources, ignore_index=True).to_csv(
+    full_sources = pd.concat(all_sources, ignore_index=True)
+    full_metrics = pd.concat(all_metrics, ignore_index=True)
+    full_bootstrap = pd.DataFrame(bootstrap_rows)
+    full_sources.to_csv(
+        out_dir / "classical_source_recording_model_matrix_predictions.csv", index=False
+    )
+    full_metrics.to_csv(
+        out_dir / "classical_source_recording_model_matrix_metrics.csv", index=False
+    )
+    full_bootstrap.to_csv(
+        out_dir / "classical_source_recording_model_matrix_bootstrap.csv", index=False
+    )
+
+    primary_mask = pd.Series(False, index=full_sources.index)
+    for split_name, model_name in PRIMARY_MODELS.items():
+        primary_mask |= (full_sources["split"] == split_name) & (
+            full_sources["model"] == model_name
+        )
+    full_sources.loc[primary_mask].to_csv(
         out_dir / "classical_source_recording_predictions.csv", index=False
     )
-    pd.concat(all_metrics, ignore_index=True).to_csv(
+    metric_primary_mask = pd.Series(False, index=full_metrics.index)
+    bootstrap_primary_mask = pd.Series(False, index=full_bootstrap.index)
+    for split_name, model_name in PRIMARY_MODELS.items():
+        metric_primary_mask |= (full_metrics["split"] == split_name) & (
+            full_metrics["model"] == model_name
+        )
+        bootstrap_primary_mask |= (full_bootstrap["split"] == split_name) & (
+            full_bootstrap["model"] == model_name
+        )
+    full_metrics.loc[metric_primary_mask].to_csv(
         out_dir / "classical_source_recording_metrics.csv", index=False
     )
-    pd.DataFrame(bootstrap_rows).to_csv(
+    full_bootstrap.loc[bootstrap_primary_mask].to_csv(
         out_dir / "classical_source_recording_bootstrap.csv", index=False
+    )
+
+    repeated_sources: list[pd.DataFrame] = []
+    repeated_metrics: list[pd.DataFrame] = []
+    for split_seed in range(42, 52):
+        split = source_file_split(features, split_seed)
+        for model_name in ["random_forest", "xgboost"]:
+            window_table, labels = _fit_probability_table(
+                features, split, columns, model_name, args.seed
+            )
+            source_table, metrics = _aggregate_recordings(
+                window_table,
+                labels,
+                f"source_file_seed_{split_seed}",
+                model_name,
+            )
+            source_table.insert(0, "split_seed", split_seed)
+            metrics.insert(0, "split_seed", split_seed)
+            repeated_sources.append(source_table)
+            repeated_metrics.append(metrics)
+    pd.concat(repeated_sources, ignore_index=True).to_csv(
+        out_dir / "repeated_source_recording_predictions.csv", index=False
+    )
+    pd.concat(repeated_metrics, ignore_index=True).to_csv(
+        out_dir / "repeated_source_recording_metrics.csv", index=False
     )
     return 0
 

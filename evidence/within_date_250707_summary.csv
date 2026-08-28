@@ -1,0 +1,5 @@
+model,aggregation,accuracy_mean,accuracy_std,accuracy_min,accuracy_max,macro_f1_mean,macro_f1_std,macro_f1_min,macro_f1_max,worst_class_recall_mean,worst_class_recall_std,worst_class_recall_min,worst_class_recall_max
+random_forest,majority_vote,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0
+random_forest,mean_probability,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0
+xgboost,majority_vote,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0
+xgboost,mean_probability,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0
