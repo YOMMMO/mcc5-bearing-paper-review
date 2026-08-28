@@ -1,4 +1,4 @@
-"""Finalize v3.1.4 provenance, release audit, and artifact hashes."""
+"""Finalize v3.1.5 provenance, release audit, and artifact hashes."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = "review-v3.1.4"
+VERSION = "review-v3.1.5"
 
 
 def sha256(path: Path) -> str:
@@ -114,10 +114,17 @@ def write_provenance() -> None:
                             "evidence/within_date_250707_predictions.csv",
                             "evidence/within_date_250707_metrics.csv",
                             "evidence/within_date_250707_summary.csv",
+                            "evidence/within_date_severity_matched_predictions.csv",
+                            "evidence/within_date_severity_matched_metrics.csv",
+                            "evidence/within_date_severity_matched_summary.csv",
+                            "evidence/within_date_severity_matched_confusion_matrices.csv",
                             "evidence/training_only_metadata_baselines.csv",
                             "evidence/training_only_metadata_predictions.csv",
                             "evidence/outer_race_date_predictions.csv",
                             "evidence/outer_race_date_summary.csv",
+                            "evidence/outer_race_date_severity_baseline_predictions.csv",
+                            "evidence/outer_race_date_severity_baseline_metrics.csv",
+                            "evidence/outer_race_date_severity_baseline_summary.csv",
                         ],
                     },
                     {
@@ -137,7 +144,8 @@ def write_provenance() -> None:
             "Raw MCC5 sensor recordings are not redistributed in this repository.",
             "A full numerical rerun requires the original MCC5 dataset.",
             "Distinct file hashes exclude byte-identical recordings but do not establish independent physical bearing specimens or acquisition sessions.",
-            "Acquisition-date controls provide mixed evidence: same-date fault separation remains perfect, while date-only and within-class date-prediction controls reveal residual session-proxy structure.",
+            "Same-date and severity-matched controls support within-date fault-class separability, but they do not establish specimen or session independence.",
+            "Outer-race date prediction is a date-severity composite control: a training-fold severity rule outperforms the signal model, so its accuracy is not independent evidence of session signatures.",
             "Random nonoverlapping-window assignment still shares source recordings across roles; recording grouping, rather than overlap removal alone, controls direct source-recording reuse.",
             "Auxiliary-26 and auxiliary-context-28 remain post-hoc exploratory on the same held-out 3000-rpm domain.",
         ],
@@ -169,13 +177,13 @@ Repository: https://github.com/YOMMMO/mcc5-bearing-paper-review
 
 ## Validation Performed Before Release
 
-- Current submission-consistency audit passes 28/28 checks.
+- Current submission-consistency audit passes 32/32 checks.
 - Publication-class counts are 24 rolling-element, 23 inner-race, 25 outer-race, and 12 healthy recordings.
 - All four formal protocols have zero source-recording overlap across training, validation, and test roles.
 - All 84 catalogued raw files resolved, have the expected 1,152,000-by-9 shape, and have distinct SHA-256 digests.
 - The repeated-timestamp trio shares its time vector but is neither byte-identical nor pointwise-identical in the eight measured channels.
-- Four matched random/grouped and overlapping/nonoverlapping partition controls are included.
-- Same-date, training-only metadata, and within-class acquisition-date controls are included with their limitations.
+- Four comparative random/grouped and overlapping/nonoverlapping partition controls are included.
+- Same-date, severity-matched, training-only metadata, and date-severity composite controls are included with their limitations.
 - A complete five-model-by-four-protocol recording-level classical matrix and ten repeated grouped-partition results are included.
 - Auxiliary-26/28 evidence remains labelled post-hoc exploratory on the same holdout.
 - Manuscripts contain a formal AI-use disclosure and no internal pre-submission reminders.

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcc5-recording-grouped-benchmark"
-version = "3.1.4"
+version = "3.1.5"
 description = "Recording-grouped MCC5 bearing fault diagnosis benchmark"
 requires-python = ">=3.12,<3.13"
 dependencies = [

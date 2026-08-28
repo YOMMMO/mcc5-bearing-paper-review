@@ -21,8 +21,8 @@ The repository is a compact software and evidence supplement for the manuscript.
 - Publication figures in PDF and PNG.
 - Recording-level catalog and frozen train/validation/test roles for all four protocols.
 - Raw-file SHA-256/shape audit and deep comparison of repeated acquisition timestamps (without redistributing raw signals).
-- Acquisition-date/class cross-tabs, same-date diagnosis, metadata-only baselines, and within-class date-prediction controls documenting residual session-confounding risk.
-- Matched random-window, nonoverlapping-window, and recording-grouped partition controls.
+- Acquisition-date/class cross-tabs, same-date and severity-matched diagnosis, metadata-only baselines, and date--severity composite controls documenting the remaining confounding boundary.
+- Comparative random-window, nonoverlapping-window, and recording-grouped partition controls.
 - Complete five-model by four-protocol classical source-recording matrix, repeated grouped partitions, majority vote, and clustered bootstrap evidence.
 - All compact evidence tables used to support the manuscript's numerical claims.
 - Exact scalar-input schemas and feature-membership definitions.
@@ -48,7 +48,7 @@ The formal MCC5 data article is [Chen et al., Data in Brief 65 (2026), 112583](h
 - The 26 stored auxiliary fields comprise 24 varying torque/key-phase summaries and two constant modality-presence indicators in this complete-modality subset.
 - Recording separation does not establish independent physical bearing specimens.
 - All 84 catalogued raw files have distinct SHA-256 hashes. This excludes byte-identical recordings, but it does not establish specimen or acquisition-session independence.
-- Same-date three-class diagnosis remains perfect under grouped splits, so date cannot by itself explain all discrimination. However, training-only date metadata predicts labels and within-class signals predict acquisition date above balanced chance; residual session-proxy confounding therefore remains unresolved.
+- Same-date three-class diagnosis and two severity-matched binary controls remain perfect under grouped splits, although the matched test sets contain only three or four recordings per repetition. Training-only date metadata predicts labels, while an outer-race severity-only rule outperforms signal-based date prediction; the latter is therefore treated as date--severity composite structure, not independent evidence of a session signature.
 - Recording-level results are supplied for all five classical models under all four predefined protocols and for ten repeated grouped source-recording partitions.
 - The paper does not claim cross-machine or non-MCC5 generalization.
 
@@ -67,7 +67,7 @@ Full experiment reproduction additionally requires the raw MCC5 dataset. The com
 
 ## Versioned Snapshot
 
-The tagged [software supplement release](https://github.com/YOMMMO/mcc5-bearing-paper-review/releases/tag/review-v3.1.4) attaches a versioned snapshot together with the main and supplementary PDFs. Use the repository for browsing and the release ZIP for one immutable download.
+The tagged [software supplement release](https://github.com/YOMMMO/mcc5-bearing-paper-review/releases/tag/review-v3.1.5) attaches a versioned snapshot together with the main and supplementary PDFs. Use the repository for browsing and the release ZIP for a versioned download.
 
 ## License
 

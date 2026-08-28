@@ -2,19 +2,21 @@
 
 Date: 2026-08-28
 
-Release: `review-v3.1.4`
+Release: `review-v3.1.5`
 
 ## Result
 
 - Python compile check: PASS.
 - Normalization and release-integrity tests: PASS, 19/19.
 - Frozen recording-group role audit: PASS.
-- Current submission-consistency audit: PASS, 28/28.
+- Current submission-consistency audit: PASS, 32/32.
+- Same-date, severity-matched control evidence: PASS for both predefined binary contrasts, with the finite-test-set limitation retained.
+- Outer-race date-severity baseline audit: PASS; the training-fold severity rule exceeds the signal-model date accuracy, so no independent session-signature claim is made.
 - Runner command-line smoke check: PASS.
 - Isolated package build and installation: PASS.
 - Installed-package import check: PASS.
 - Three publication PDFs compiled: PASS.
-- All 42 rendered PDF pages visually inspected: PASS.
+- All 43 rendered PDF pages visually inspected: PASS.
 - Undefined citation/reference and overfull-box scan: PASS.
 - Raw data included: NO.
 - Model checkpoints included: NO.
@@ -35,7 +37,7 @@ Release: `review-v3.1.4`
 
 - `python -m compileall -q src tests run_formal_dl_fusion_gpu.py run_postfix_neural_fusion_pipeline.py` -> exit 0.
 - `python -m unittest discover -s tests -v` -> 19 tests passed.
-- `python src/experiments/exp40_release_consistency_audit.py` -> 28 checks passed.
+- `python src/experiments/exp40_release_consistency_audit.py` -> 32 checks passed.
 - `python run_postfix_neural_fusion_pipeline.py --help` -> exit 0.
 - `python -m pip install --no-deps --no-build-isolation --target <temporary-install-dir> .` -> wheel built and installed successfully.
 - Installed-package import check for split auditing, peer-review controls, the CNN module, and train-only normalization -> PASS.

@@ -36,6 +36,7 @@ from src.utils.tables import read_table
 
 
 DATE_PATTERN = re.compile(r"(\d{6})\d{6}[A-Za-z]*$")
+SEVERITY_PATTERN = re.compile(r"bearing_(?:ball|inner|outer)_([HL])_")
 CLASSICAL_CONTROLS = ["random_forest", "xgboost"]
 
 
@@ -43,6 +44,13 @@ def acquisition_date(source_file: str) -> str:
     match = DATE_PATTERN.search(Path(str(source_file)).stem)
     if not match:
         raise ValueError(f"Cannot parse acquisition date from {source_file}")
+    return match.group(1)
+
+
+def fault_severity(source_file: str) -> str:
+    match = SEVERITY_PATTERN.search(Path(str(source_file)).stem)
+    if not match:
+        raise ValueError(f"Cannot parse fault severity from {source_file}")
     return match.group(1)
 
 
@@ -106,6 +114,117 @@ def run_within_date_control(
         for column in summary.columns
     ]
     return source_table, metric_table, summary
+
+
+def run_severity_matched_within_date_controls(
+    features: pd.DataFrame,
+    columns: list[str],
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    framed = features.copy()
+    framed["acquisition_date"] = framed["source_file"].astype(str).map(
+        acquisition_date
+    )
+    fault_rows = framed["label_group"].astype(str) != "healthy"
+    framed.loc[fault_rows, "severity"] = framed.loc[
+        fault_rows, "source_file"
+    ].astype(str).map(fault_severity)
+    tasks = {
+        "same_date_250707_high_ball_vs_outer": {
+            "date": "250707",
+            "severity": "H",
+            "labels": {"bearing_ball", "bearing_outer"},
+        },
+        "same_date_250707_low_ball_vs_inner": {
+            "date": "250707",
+            "severity": "L",
+            "labels": {"bearing_ball", "bearing_inner"},
+        },
+    }
+    source_rows: list[pd.DataFrame] = []
+    metric_rows: list[pd.DataFrame] = []
+    confusion_rows: list[dict[str, object]] = []
+    for task, definition in tasks.items():
+        subset = framed.loc[
+            (framed["acquisition_date"] == definition["date"])
+            & (framed["severity"] == definition["severity"])
+            & framed["label_group"].astype(str).isin(definition["labels"])
+        ].copy()
+        recording_table = subset[
+            ["source_file", "label_group"]
+        ].drop_duplicates("source_file")
+        if set(recording_table["label_group"].astype(str)) != definition["labels"]:
+            raise RuntimeError(f"Matched control {task} is missing a target class")
+        for split_seed in range(42, 52):
+            split = source_file_split(subset, split_seed)
+            roles = source_role_map(subset, split)
+            role_counts = roles["split"].value_counts().to_dict()
+            for model_name in CLASSICAL_CONTROLS:
+                windows, labels = _fit_probability_table(
+                    subset, split, columns, model_name, seed=42
+                )
+                source_table, metric_table = _aggregate_recordings(
+                    windows, labels, task, model_name
+                )
+                source_table.insert(0, "split_seed", split_seed)
+                source_table.insert(1, "task", task)
+                source_table.insert(2, "acquisition_date", definition["date"])
+                source_table.insert(3, "severity", definition["severity"])
+                metric_table.insert(0, "split_seed", split_seed)
+                metric_table.insert(1, "task", task)
+                metric_table.insert(2, "acquisition_date", definition["date"])
+                metric_table.insert(3, "severity", definition["severity"])
+                metric_table["train_recordings"] = int(role_counts.get("train", 0))
+                metric_table["validation_recordings"] = int(
+                    role_counts.get("val", 0)
+                )
+                metric_table["test_recordings"] = int(role_counts.get("test", 0))
+                source_rows.append(source_table)
+                metric_rows.append(metric_table)
+
+                class_labels = sorted(source_table["true_label"].astype(str).unique())
+                matrix = confusion_matrix(
+                    source_table["true_label"],
+                    source_table["mean_probability_prediction"],
+                    labels=class_labels,
+                )
+                confusion_rows.append(
+                    {
+                        "task": task,
+                        "acquisition_date": definition["date"],
+                        "severity": definition["severity"],
+                        "model": model_name,
+                        "split_seed": split_seed,
+                        "labels": "|".join(class_labels),
+                        "test_recordings": len(source_table),
+                        "confusion_matrix": ";".join(
+                            ",".join(str(int(value)) for value in row)
+                            for row in matrix
+                        ),
+                    }
+                )
+    source_table = pd.concat(source_rows, ignore_index=True)
+    metric_table = pd.concat(metric_rows, ignore_index=True)
+    summary = (
+        metric_table.groupby(
+            ["task", "acquisition_date", "severity", "model", "aggregation"]
+        )[
+            [
+                "source_recording_count",
+                "accuracy",
+                "macro_f1",
+                "worst_class_recall",
+            ]
+        ]
+        .agg(["mean", "std", "min", "max"])
+        .reset_index()
+    )
+    summary.columns = [
+        "_".join(part for part in column if part)
+        if isinstance(column, tuple)
+        else column
+        for column in summary.columns
+    ]
+    return source_table, metric_table, summary, pd.DataFrame(confusion_rows)
 
 
 def _metadata_pipeline(
@@ -269,6 +388,73 @@ def run_outer_date_predictability(
     return pd.concat(source_rows, ignore_index=True), summary
 
 
+def run_outer_date_severity_baseline(
+    features: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    subset = features[features["label_group"].astype(str) == "bearing_outer"].copy()
+    recordings = subset[["source_file"]].drop_duplicates("source_file")
+    recordings["true_date"] = recordings["source_file"].astype(str).map(
+        acquisition_date
+    )
+    recordings["severity"] = recordings["source_file"].astype(str).map(
+        fault_severity
+    )
+    labels = sorted(recordings["true_date"].unique())
+    splitter = RepeatedStratifiedKFold(n_splits=2, n_repeats=5, random_state=42)
+    prediction_rows: list[pd.DataFrame] = []
+    metric_rows: list[dict[str, object]] = []
+    for fold_index, (train_index, test_index) in enumerate(
+        splitter.split(recordings["source_file"], recordings["true_date"]), start=1
+    ):
+        train = recordings.iloc[train_index].copy()
+        test = recordings.iloc[test_index].copy()
+        default_date = sorted(
+            train["true_date"].value_counts().loc[lambda values: values == values.max()].index
+        )[0]
+        mapping = {
+            severity: sorted(
+                frame["true_date"]
+                .value_counts()
+                .loc[lambda values: values == values.max()]
+                .index
+            )[0]
+            for severity, frame in train.groupby("severity", sort=True)
+        }
+        predictions = test["severity"].map(mapping).fillna(default_date).astype(str)
+        metrics = classification_metrics(test["true_date"], predictions, labels=labels)
+        metric_rows.append(
+            {
+                "fold": fold_index,
+                "feature_set": "severity_only",
+                "model": "training_fold_majority_rule",
+                "aggregation": "recording",
+                "train_recordings": len(train),
+                "source_recording_count": len(test),
+                **metrics,
+            }
+        )
+        prediction_table = test.copy()
+        prediction_table.insert(0, "fold", fold_index)
+        prediction_table["prediction"] = predictions.to_numpy()
+        prediction_table["fit_scope"] = "training_fold_only"
+        prediction_rows.append(prediction_table)
+    metric_table = pd.DataFrame(metric_rows)
+    summary = (
+        metric_table.groupby(["feature_set", "model", "aggregation"])[
+            ["accuracy", "macro_f1", "worst_class_recall"]
+        ]
+        .agg(["mean", "std", "min", "max"])
+        .reset_index()
+    )
+    summary.columns = [
+        "_".join(part for part in column if part)
+        if isinstance(column, tuple)
+        else column
+        for column in summary.columns
+    ]
+    return pd.concat(prediction_rows, ignore_index=True), metric_table, summary
+
+
 def _stratified_window_split(features: pd.DataFrame, seed: int) -> pd.DataFrame:
     indices = np.arange(len(features))
     train_index, remainder_index = train_test_split(
@@ -397,6 +583,25 @@ def main(argv: list[str] | None = None) -> int:
     within_metrics.to_csv(out / "within_date_250707_metrics.csv", index=False)
     within_summary.to_csv(out / "within_date_250707_summary.csv", index=False)
 
+    (
+        matched_sources,
+        matched_metrics,
+        matched_summary,
+        matched_confusions,
+    ) = run_severity_matched_within_date_controls(features, columns)
+    matched_sources.to_csv(
+        out / "within_date_severity_matched_predictions.csv", index=False
+    )
+    matched_metrics.to_csv(
+        out / "within_date_severity_matched_metrics.csv", index=False
+    )
+    matched_summary.to_csv(
+        out / "within_date_severity_matched_summary.csv", index=False
+    )
+    matched_confusions.to_csv(
+        out / "within_date_severity_matched_confusion_matrices.csv", index=False
+    )
+
     metadata_metrics, metadata_predictions = run_training_only_metadata_baselines(
         features, Path(args.split_dir)
     )
@@ -420,6 +625,20 @@ def main(argv: list[str] | None = None) -> int:
     )
     outer_sources.to_csv(out / "outer_race_date_predictions.csv", index=False)
     outer_summary.to_csv(out / "outer_race_date_summary.csv", index=False)
+    (
+        severity_date_predictions,
+        severity_date_metrics,
+        severity_date_summary,
+    ) = run_outer_date_severity_baseline(features)
+    severity_date_predictions.to_csv(
+        out / "outer_race_date_severity_baseline_predictions.csv", index=False
+    )
+    severity_date_metrics.to_csv(
+        out / "outer_race_date_severity_baseline_metrics.csv", index=False
+    )
+    severity_date_summary.to_csv(
+        out / "outer_race_date_severity_baseline_summary.csv", index=False
+    )
 
     partition_controls = run_partition_controls(features, columns)
     partition_controls.to_csv(out / "partition_leakage_controls.csv", index=False)

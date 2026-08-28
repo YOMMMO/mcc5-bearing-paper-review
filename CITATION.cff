@@ -5,7 +5,7 @@ type: software
 authors:
   - family-names: Li
     given-names: Yu
-version: 3.1.4
+version: 3.1.5
 date-released: 2026-08-28
 license: MIT
 repository-code: "https://github.com/YOMMMO/mcc5-bearing-paper-review"

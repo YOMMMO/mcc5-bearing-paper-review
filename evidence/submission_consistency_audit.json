@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "package_version": "3.1.4",
-  "generated_at_utc": "2026-08-28T02:38:06.431342+00:00",
+  "package_version": "3.1.5",
+  "generated_at_utc": "2026-08-28T11:36:44.920920+00:00",
   "overall_status": "PASS",
-  "check_count": 28,
+  "check_count": 32,
   "failure_count": 0,
   "checks": [
     {
@@ -34,17 +34,17 @@
     {
       "check": "release_version_readme",
       "status": "PASS",
-      "detail": "review-v3.1.4"
+      "detail": "review-v3.1.5"
     },
     {
       "check": "release_version_citation",
       "status": "PASS",
-      "detail": "3.1.4"
+      "detail": "3.1.5"
     },
     {
       "check": "release_version_pyproject",
       "status": "PASS",
-      "detail": "3.1.4"
+      "detail": "3.1.5"
     },
     {
       "check": "no_internal_reminders_in_manuscripts",
@@ -65,6 +65,16 @@
       "check": "abstract_excludes_posthoc_auxiliary",
       "status": "PASS",
       "detail": "post-hoc winner absent"
+    },
+    {
+      "check": "abstract_excludes_confounded_date_accuracy",
+      "status": "PASS",
+      "detail": "outer-race date accuracy and overbroad interpretation absent"
+    },
+    {
+      "check": "comparative_partition_wording",
+      "status": "PASS",
+      "detail": "partition controls are described as parallel/comparative rather than matched"
     },
     {
       "check": "bootstrap_boundary_wording",
@@ -122,29 +132,39 @@
       "detail": "rows=4"
     },
     {
+      "check": "severity_matched_same_date_controls",
+      "status": "PASS",
+      "detail": "tasks=2; rows=8"
+    },
+    {
       "check": "training_only_date_baseline",
       "status": "PASS",
       "detail": "range=0.7028-0.7723"
     },
     {
-      "check": "within_class_date_prediction",
+      "check": "date_severity_composite_prediction",
       "status": "PASS",
       "detail": "accuracy=0.8635; worst=0.0000"
     },
     {
+      "check": "outer_date_severity_baseline",
+      "status": "PASS",
+      "detail": "severity-rule accuracy=0.9199; signal-model accuracy=0.8635"
+    },
+    {
       "check": "pdf_main",
       "status": "PASS",
-      "detail": "bytes=391909"
+      "detail": "bytes=392844"
     },
     {
       "check": "pdf_supplementary",
       "status": "PASS",
-      "detail": "bytes=292213"
+      "detail": "bytes=294203"
     },
     {
       "check": "pdf_main_machines",
       "status": "PASS",
-      "detail": "bytes=457654"
+      "detail": "bytes=458748"
     }
   ]
 }

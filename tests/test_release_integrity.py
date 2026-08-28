@@ -47,7 +47,14 @@ class ReleaseIntegrityTests(unittest.TestCase):
             "evidence/partition_leakage_controls_summary.csv",
             "evidence/training_only_metadata_baselines.csv",
             "evidence/within_date_250707_summary.csv",
+            "evidence/within_date_severity_matched_predictions.csv",
+            "evidence/within_date_severity_matched_metrics.csv",
+            "evidence/within_date_severity_matched_summary.csv",
+            "evidence/within_date_severity_matched_confusion_matrices.csv",
             "evidence/outer_race_date_summary.csv",
+            "evidence/outer_race_date_severity_baseline_predictions.csv",
+            "evidence/outer_race_date_severity_baseline_metrics.csv",
+            "evidence/outer_race_date_severity_baseline_summary.csv",
             "paper/main.tex",
             "paper/supplementary.tex",
         ]
@@ -166,6 +173,19 @@ class ReleaseIntegrityTests(unittest.TestCase):
 
         within_date = pd.read_csv(ROOT / "evidence/within_date_250707_summary.csv")
         self.assertEqual(set(within_date["macro_f1_mean"]), {1.0})
+        matched = pd.read_csv(
+            ROOT / "evidence/within_date_severity_matched_summary.csv"
+        )
+        self.assertEqual(
+            set(matched["task"]),
+            {
+                "same_date_250707_high_ball_vs_outer",
+                "same_date_250707_low_ball_vs_inner",
+            },
+        )
+        self.assertEqual(set(matched["macro_f1_mean"]), {1.0})
+        self.assertEqual(set(matched["worst_class_recall_mean"]), {1.0})
+        self.assertEqual(set(matched["source_recording_count_mean"]), {3.0, 4.0})
         outer_date = pd.read_csv(ROOT / "evidence/outer_race_date_summary.csv")
         xgb = outer_date[
             (outer_date["feature_set"] == "all_signals_without_order")
@@ -173,17 +193,28 @@ class ReleaseIntegrityTests(unittest.TestCase):
             & (outer_date["aggregation"] == "mean_probability")
         ].iloc[0]
         self.assertGreater(float(xgb["accuracy_mean"]), 0.8)
+        severity_date = pd.read_csv(
+            ROOT / "evidence/outer_race_date_severity_baseline_summary.csv"
+        ).iloc[0]
+        self.assertGreater(
+            float(severity_date["accuracy_mean"]), float(xgb["accuracy_mean"])
+        )
+        self.assertEqual(float(severity_date["worst_class_recall_mean"]), 0.0)
 
     def test_posthoc_auxiliary_result_is_not_in_the_abstract(self) -> None:
         main = (ROOT / "paper/main.tex").read_text(encoding="utf-8")
         abstract = main.split("\\begin{abstract}", 1)[1].split("\\end{abstract}", 1)[0]
         self.assertNotIn("auxiliary-26", abstract)
         self.assertNotIn("0.9162", abstract)
+        self.assertNotIn("0.8635", abstract)
+        self.assertNotIn("genuine fault discrimination", abstract)
 
         machines = (ROOT / "paper/main_machines.tex").read_text(encoding="utf-8")
         machines_abstract = machines.split("\\abstract{", 1)[1].split("}\n", 1)[0]
         self.assertNotIn("auxiliary-26", machines_abstract)
         self.assertNotIn("0.9162", machines_abstract)
+        self.assertNotIn("0.8635", machines_abstract)
+        self.assertNotIn("genuine fault discrimination", machines_abstract)
 
     def test_public_manuscripts_exclude_internal_instructions(self) -> None:
         forbidden = [
@@ -194,6 +225,8 @@ class ReleaseIntegrityTests(unittest.TestCase):
             "E:\\thesis2",
             "must be confirmed before submission",
             "must be regenerated",
+            "matched partition",
+            "matched splits",
         ]
         for relative in ["paper/main.tex", "paper/main_machines.tex", "paper/supplementary.tex"]:
             content = (ROOT / relative).read_text(encoding="utf-8")
@@ -205,6 +238,7 @@ class ReleaseIntegrityTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertNotIn("GPT Pro", readme)
         self.assertNotIn("prepared prompt", readme)
+        self.assertNotIn("immutable download", readme)
 
     def test_publication_facing_ai_disclosure_is_specific(self) -> None:
         for relative in ["paper/main.tex", "paper/main_machines.tex"]:
@@ -228,19 +262,19 @@ class ReleaseIntegrityTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
-        self.assertEqual(audit["package_version"], "3.1.4")
+        self.assertEqual(audit["package_version"], "3.1.5")
         self.assertEqual(audit["overall_status"], "PASS")
         self.assertEqual(int(audit["failure_count"]), 0)
-        self.assertEqual(int(audit["check_count"]), 28)
+        self.assertEqual(int(audit["check_count"]), 32)
 
     def test_release_version_alignment(self) -> None:
-        self.assertIn("review-v3.1.4", (ROOT / "README.md").read_text(encoding="utf-8"))
-        self.assertIn("version: 3.1.4", (ROOT / "CITATION.cff").read_text(encoding="utf-8"))
-        self.assertIn('version = "3.1.4"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+        self.assertIn("review-v3.1.5", (ROOT / "README.md").read_text(encoding="utf-8"))
+        self.assertIn("version: 3.1.5", (ROOT / "CITATION.cff").read_text(encoding="utf-8"))
+        self.assertIn('version = "3.1.5"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"))
         provenance = json.loads(
             (ROOT / "review/RUN_PROVENANCE_MANIFEST.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(provenance["package_version"], "review-v3.1.4")
+        self.assertEqual(provenance["package_version"], "review-v3.1.5")
 
     def test_artifact_manifest_hashes(self) -> None:
         manifest = pd.read_csv(ROOT / "review/ARTIFACT_MANIFEST_SHA256.csv")

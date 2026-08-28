@@ -40,7 +40,7 @@ Counts of recordings by protocol, role, and publication-facing class.
 
 ## Session Metadata Boundary
 
-Acquisition dates parsed from public recording identifiers are supplied in `evidence/session_metadata_audit.csv`. Date/class and date/protocol-role cross-tabs are descriptive checks for possible session confounding. The reported in-sample date-majority association is not a trained classifier or causal estimate. Complementary controls are supplied in `evidence/within_date_250707_summary.csv`, `evidence/training_only_metadata_baselines.csv`, and `evidence/outer_race_date_summary.csv`: same-date diagnosis shows that date alone cannot explain all discrimination, while metadata and within-class date prediction show that residual session-proxy confounding remains plausible.
+Acquisition dates parsed from public recording identifiers are supplied in `evidence/session_metadata_audit.csv`. Date/class and date/protocol-role cross-tabs are descriptive checks for possible session confounding. The reported in-sample date-majority association is not a trained classifier or causal estimate. Complementary controls are supplied in `evidence/within_date_250707_summary.csv`, `evidence/within_date_severity_matched_summary.csv`, `evidence/training_only_metadata_baselines.csv`, `evidence/outer_race_date_summary.csv`, and `evidence/outer_race_date_severity_baseline_summary.csv`. Same-date and severity-matched diagnosis support fault-location separability for the observed contrasts, while metadata prediction and the outer-race date--severity structure show why the release cannot claim specimen- or session-independent diagnosis.
 
 ## Why Per-Window Maps Are Omitted
 

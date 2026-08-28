@@ -89,7 +89,7 @@ The direct partition control crosses random versus source-recording-grouped assi
 
 \begin{table}[H]
 \centering
-\caption{Direct partition control across ten matched split seeds. Variability is split variability, not optimization-seed variability.}
+\caption{Direct partition comparison across ten parallel split seeds. Variability is split variability, not optimization-seed variability.}
 \label{tab:s_partition_control}
 \small
 \resizebox{\textwidth}{!}{%
@@ -105,7 +105,27 @@ Recording-grouped, nonoverlapping windows & 0 & 0.9765 $\pm$ 0.0358 & 0.9075--0.
 \end{tabular}}
 \end{table}
 
-On 250707, 47 recordings cover inner-race, outer-race, and rolling-element faults but no healthy class. Random forest and XGBoost both achieve 1.0000 recording macro-F1 under mean-probability aggregation and majority vote across all ten recording-grouped splits. This establishes within-date separability for those three fault classes only; it is not a four-class session-independent validation.
+On 250707, 47 recordings cover inner-race, outer-race, and rolling-element faults but no healthy class. Severity is not balanced across these classes: inner-race recordings are low severity, outer-race recordings are high severity, and rolling-element recordings include both. Random forest and XGBoost both achieve 1.0000 recording macro-F1 under mean-probability aggregation and majority vote across all ten recording-grouped splits. This establishes within-date separability for those three fault classes only; it is not a four-class or severity-controlled validation.
+
+Two binary controls additionally fix both date and severity. The high-severity task compares 12 rolling-element with 11 outer-race recordings; the low-severity task compares 12 rolling-element with 12 inner-race recordings. Both models and both recording-level aggregation rules achieve 1.0000 macro-F1 and worst-class recall across split seeds 42--51 (Table~\ref{tab:s_severity_matched}). Each repetition tests only three high-severity or four low-severity recordings, however, and repeatedly partitions the same finite pool. These controls support within-date, severity-matched fault-location separability for the observed contrasts without establishing specimen or session independence.
+
+\begin{table}[H]
+\centering
+\caption{Same-date, severity-matched binary controls over ten recording-grouped split seeds. Values are recording-level mean $\pm$ standard deviation; mean-probability aggregation is shown because majority vote is identical.}
+\label{tab:s_severity_matched}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccc}
+\toprule
+Severity-matched task & Model & Test records/split & Accuracy & Macro-F1 & Worst recall \\
+\midrule
+H: rolling-element vs. outer-race & Random forest & 3 & 1.0000 $\pm$ 0.0000 & 1.0000 $\pm$ 0.0000 & 1.0000 $\pm$ 0.0000 \\
+H: rolling-element vs. outer-race & XGBoost & 3 & 1.0000 $\pm$ 0.0000 & 1.0000 $\pm$ 0.0000 & 1.0000 $\pm$ 0.0000 \\
+L: rolling-element vs. inner-race & Random forest & 4 & 1.0000 $\pm$ 0.0000 & 1.0000 $\pm$ 0.0000 & 1.0000 $\pm$ 0.0000 \\
+L: rolling-element vs. inner-race & XGBoost & 4 & 1.0000 $\pm$ 0.0000 & 1.0000 $\pm$ 0.0000 & 1.0000 $\pm$ 0.0000 \\
+\bottomrule
+\end{tabular}}
+\end{table}
 
 Metadata-only baselines were fitted on each protocol's training recordings and evaluated on its test recordings. The operating-context-only baseline is weak, while acquisition date alone is predictive because date and class composition are associated. Combining date and operating context changes only the high-speed protocol materially (Table~\ref{tab:s_metadata_control}). Date is not an input to the diagnostic models; this control quantifies a possible shortcut in the dataset structure rather than model reliance on timestamp metadata.
 
@@ -134,11 +154,11 @@ Date + operating context & Cross-RPM & 0.7739 & 0.4286 & 0.7500 \\
 \end{tabular}
 \end{table}
 
-Acquisition-date predictability was also tested within the 25 outer-race recordings, holding fault location fixed. Ten repeated source-grouped folds were used. Table~\ref{tab:s_outer_date} shows that the signals retain date-related information, but the rare 250821 date has only two recordings and is generally not recovered. The zero or near-zero worst-date recall prevents the accuracy values from being interpreted as balanced date classification.
+Acquisition-date predictability was also tested within the 25 outer-race recordings, holding fault location fixed. However, severity and date are strongly coupled: all 12 low-severity recordings occur on 250708, while high-severity recordings occur on 250707 (11) or 250821 (2). Ten repeated source-grouped folds were used. A training-fold severity-majority rule reaches 0.9199 mean accuracy and 0.6387 macro-F1, exceeding the best signal-model accuracy and macro-F1 in Table~\ref{tab:s_outer_date}. Neither approach recovers the rare date. Consequently, this experiment is interpreted as date--severity composite predictability rather than independent evidence of a session signature.
 
 \begin{table}[H]
 \centering
-\caption{Outer-race-only acquisition-date prediction across ten repeated source-grouped folds. Values are mean $\pm$ standard deviation.}
+\caption{Outer-race date--severity composite prediction across ten repeated source-grouped folds. Values are mean $\pm$ standard deviation.}
 \label{tab:s_outer_date}
 \small
 \resizebox{\textwidth}{!}{%
@@ -152,6 +172,7 @@ All signals without order & Random forest & 0.8468 $\pm$ 0.1140 & 0.5857 $\pm$ 0
 All signals without order & XGBoost & 0.8635 $\pm$ 0.0775 & 0.5995 $\pm$ 0.0547 & 0.0000 \\
 Vibration/current without order & Random forest & 0.8231 $\pm$ 0.1375 & 0.5975 $\pm$ 0.1690 & 0.1000 \\
 Vibration/current without order & XGBoost & 0.8391 $\pm$ 0.1098 & 0.5799 $\pm$ 0.0816 & 0.0000 \\
+Severity only & Training-fold majority rule & 0.9199 $\pm$ 0.0034 & 0.6387 $\pm$ 0.0025 & 0.0000 \\
 \bottomrule
 \end{tabular}}
 \end{table}

@@ -32,7 +32,7 @@ It is not presented as a new state-of-the-art domain-generalization network.
 - Complete source-recording results for five classical models under all four predefined protocols.
 - Corrected raw-neural and strict engineered/fusion results generated with training-only z-score statistics.
 - Recording-level aggregation and class-stratified recording bootstrap.
-- Matched random-window, nonoverlapping-window, and recording-grouped partition controls.
+- Comparative random-window, nonoverlapping-window, and recording-grouped partition controls.
 - Raw-file identity audit showing 84 distinct SHA-256 values and value-level comparison of the only repeated-timestamp group.
 
 ### Descriptive sensitivity evidence
@@ -41,7 +41,7 @@ It is not presented as a new state-of-the-art domain-generalization network.
 - Severity-stratified analysis.
 - Per-recording probability visualization.
 - Acquisition-date/class association and protocol-role cross-tabs.
-- Same-date three-class diagnosis, training-only date/context metadata baselines, and outer-race-only acquisition-date prediction. Taken together, these controls show that date alone cannot explain all discrimination while residual session-proxy confounding remains plausible.
+- Same-date three-class diagnosis, two severity-matched same-date binary tasks, training-only date/context metadata baselines, and outer-race date--severity composite prediction. The matched binary tasks support within-date fault-location separability for the observed contrasts, while the outer-race control cannot isolate session information because severity alone predicts date more accurately than the signal model.
 
 ### Post-hoc exploratory evidence
 

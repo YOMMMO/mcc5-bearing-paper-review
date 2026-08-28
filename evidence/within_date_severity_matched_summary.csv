@@ -1,0 +1,9 @@
+task,acquisition_date,severity,model,aggregation,source_recording_count_mean,source_recording_count_std,source_recording_count_min,source_recording_count_max,accuracy_mean,accuracy_std,accuracy_min,accuracy_max,macro_f1_mean,macro_f1_std,macro_f1_min,macro_f1_max,worst_class_recall_mean,worst_class_recall_std,worst_class_recall_min,worst_class_recall_max
+same_date_250707_high_ball_vs_outer,250707,H,random_forest,majority_vote,3.0,0.0,3,3,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0
+same_date_250707_high_ball_vs_outer,250707,H,random_forest,mean_probability,3.0,0.0,3,3,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0
+same_date_250707_high_ball_vs_outer,250707,H,xgboost,majority_vote,3.0,0.0,3,3,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0
+same_date_250707_high_ball_vs_outer,250707,H,xgboost,mean_probability,3.0,0.0,3,3,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0
+same_date_250707_low_ball_vs_inner,250707,L,random_forest,majority_vote,4.0,0.0,4,4,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0
+same_date_250707_low_ball_vs_inner,250707,L,random_forest,mean_probability,4.0,0.0,4,4,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0
+same_date_250707_low_ball_vs_inner,250707,L,xgboost,majority_vote,4.0,0.0,4,4,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0
+same_date_250707_low_ball_vs_inner,250707,L,xgboost,mean_probability,4.0,0.0,4,4,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0

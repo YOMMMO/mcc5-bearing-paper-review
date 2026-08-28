@@ -15,7 +15,7 @@ TITLE = (
     "Recording-Grouped Bearing Fault Diagnosis under Directional "
     "Operating-Condition Shifts on the MCC5 Electric-Drive Benchmark"
 )
-VERSION = "3.1.4"
+VERSION = "3.1.5"
 
 
 def text(relative: str) -> str:
@@ -86,6 +86,17 @@ def main() -> None:
 
     abstract = text("paper/main.tex").split("\\begin{abstract}", 1)[1].split("\\end{abstract}", 1)[0]
     add("abstract_excludes_posthoc_auxiliary", "auxiliary-26" not in abstract and "0.9162" not in abstract, "post-hoc winner absent")
+    add(
+        "abstract_excludes_confounded_date_accuracy",
+        "0.8635" not in abstract and "genuine fault discrimination" not in abstract,
+        "outer-race date accuracy and overbroad interpretation absent",
+    )
+    add(
+        "comparative_partition_wording",
+        "matched partition" not in " ".join(text(relative).lower() for relative in public_tex)
+        and "matched splits" not in " ".join(text(relative).lower() for relative in public_tex),
+        "partition controls are described as parallel/comparative rather than matched",
+    )
     add("bootstrap_boundary_wording", "conditional on the fitted model and finite test-recording set" in text("paper/main.tex"), "future-specimen uncertainty is not claimed")
 
     catalog = pd.read_csv(ROOT / "data/recording_catalog_and_splits.csv")
@@ -105,8 +116,11 @@ def main() -> None:
         "evidence/classical_source_recording_model_matrix_bootstrap.csv",
         "evidence/repeated_source_recording_metrics.csv",
         "evidence/within_date_250707_summary.csv",
+        "evidence/within_date_severity_matched_summary.csv",
+        "evidence/within_date_severity_matched_confusion_matrices.csv",
         "evidence/training_only_metadata_baselines.csv",
         "evidence/outer_race_date_summary.csv",
+        "evidence/outer_race_date_severity_baseline_summary.csv",
     ]
     missing = [relative for relative in required if not (ROOT / relative).exists()]
     add("new_control_artifacts_present", not missing, ", ".join(missing) or "all present")
@@ -136,13 +150,38 @@ def main() -> None:
     same_date = pd.read_csv(ROOT / "evidence/within_date_250707_summary.csv")
     add("same_date_control", same_date["macro_f1_mean"].eq(1.0).all() and same_date["worst_class_recall_mean"].eq(1.0).all(), f"rows={len(same_date)}")
 
+    matched = pd.read_csv(ROOT / "evidence/within_date_severity_matched_summary.csv")
+    expected_tasks = {
+        "same_date_250707_high_ball_vs_outer",
+        "same_date_250707_low_ball_vs_inner",
+    }
+    add(
+        "severity_matched_same_date_controls",
+        set(matched["task"]) == expected_tasks
+        and matched["macro_f1_mean"].eq(1.0).all()
+        and matched["worst_class_recall_mean"].eq(1.0).all()
+        and set(matched["source_recording_count_mean"]) == {3.0, 4.0},
+        f"tasks={matched['task'].nunique()}; rows={len(matched)}",
+    )
+
     metadata = pd.read_csv(ROOT / "evidence/training_only_metadata_baselines.csv")
     date_logit = metadata[(metadata["feature_set"] == "date_only") & (metadata["model"] == "logistic_regression")]
     add("training_only_date_baseline", len(date_logit) == 4 and date_logit["macro_f1"].between(0.70, 0.78).all(), f"range={date_logit['macro_f1'].min():.4f}-{date_logit['macro_f1'].max():.4f}")
 
     outer = pd.read_csv(ROOT / "evidence/outer_race_date_summary.csv")
     outer_xgb = outer[(outer["feature_set"] == "all_signals_without_order") & (outer["model"] == "xgboost") & (outer["aggregation"] == "mean_probability")].iloc[0]
-    add("within_class_date_prediction", round(float(outer_xgb["accuracy_mean"]), 4) == 0.8635 and float(outer_xgb["worst_class_recall_mean"]) == 0.0, f"accuracy={outer_xgb['accuracy_mean']:.4f}; worst={outer_xgb['worst_class_recall_mean']:.4f}")
+    add("date_severity_composite_prediction", round(float(outer_xgb["accuracy_mean"]), 4) == 0.8635 and float(outer_xgb["worst_class_recall_mean"]) == 0.0, f"accuracy={outer_xgb['accuracy_mean']:.4f}; worst={outer_xgb['worst_class_recall_mean']:.4f}")
+    severity_date = pd.read_csv(
+        ROOT / "evidence/outer_race_date_severity_baseline_summary.csv"
+    ).iloc[0]
+    add(
+        "outer_date_severity_baseline",
+        round(float(severity_date["accuracy_mean"]), 4) == 0.9199
+        and round(float(severity_date["macro_f1_mean"]), 4) == 0.6387
+        and float(severity_date["worst_class_recall_mean"]) == 0.0
+        and float(severity_date["accuracy_mean"]) > float(outer_xgb["accuracy_mean"]),
+        f"severity-rule accuracy={severity_date['accuracy_mean']:.4f}; signal-model accuracy={outer_xgb['accuracy_mean']:.4f}",
+    )
 
     for relative in ["paper/main.pdf", "paper/supplementary.pdf", "paper/main_machines.pdf"]:
         path = ROOT / relative

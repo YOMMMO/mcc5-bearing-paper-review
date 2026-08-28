@@ -1,0 +1,2 @@
+feature_set,model,aggregation,accuracy_mean,accuracy_std,accuracy_min,accuracy_max,macro_f1_mean,macro_f1_std,macro_f1_min,macro_f1_max,worst_class_recall_mean,worst_class_recall_std,worst_class_recall_min,worst_class_recall_max
+severity_only,training_fold_majority_rule,recording,0.9198717948717949,0.0033785017736842225,0.9166666666666666,0.9230769230769231,0.6386946386946387,0.002457092199043064,0.6363636363636364,0.6410256410256411,0.0,0.0,0.0,0.0

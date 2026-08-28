@@ -1,6 +1,6 @@
 {
   "schema_version": "1.1",
-  "package_version": "review-v3.1.4",
+  "package_version": "review-v3.1.5",
   "formal_run_id": "postfix_neural_fusion_20260710_180646",
   "repository": "https://github.com/YOMMMO/mcc5-bearing-paper-review",
   "evidence_classes": {
@@ -49,10 +49,17 @@
             "evidence/within_date_250707_predictions.csv",
             "evidence/within_date_250707_metrics.csv",
             "evidence/within_date_250707_summary.csv",
+            "evidence/within_date_severity_matched_predictions.csv",
+            "evidence/within_date_severity_matched_metrics.csv",
+            "evidence/within_date_severity_matched_summary.csv",
+            "evidence/within_date_severity_matched_confusion_matrices.csv",
             "evidence/training_only_metadata_baselines.csv",
             "evidence/training_only_metadata_predictions.csv",
             "evidence/outer_race_date_predictions.csv",
-            "evidence/outer_race_date_summary.csv"
+            "evidence/outer_race_date_summary.csv",
+            "evidence/outer_race_date_severity_baseline_predictions.csv",
+            "evidence/outer_race_date_severity_baseline_metrics.csv",
+            "evidence/outer_race_date_severity_baseline_summary.csv"
           ]
         },
         {
@@ -70,12 +77,12 @@
     "evidence/split.csv": "5ddf13cd56eebe36a7b71059637a6c5a7370d808c6190ea431bacc8d96af3ab9",
     "evidence/normalization.csv": "36f92dec721fe6e2f576dfe14fa677d30223310ba928d08ca6e2fe131de4cc64",
     "evidence/all_fusion_input_protocol_results.csv": "d5d0e26bf14410f76528308d1246048c4d8684a3e79ba2df7b9e2047fe28297f",
-    "evidence/submission_consistency_audit.json": "3bb148fadebd07020ec3525bd879e649cebbb4ec1ad7166bb309da0d6b33010f",
+    "evidence/submission_consistency_audit.json": "2a9687a7ddcfb7c2b732ac5b52f5ecb8df43813624cc26f276041cb3a71848f8",
     "src/data/audit_mcc5_provenance.py": "3172c697efcb1c73ab586d6a7fe9d0a9c0cf33fdcb4961037350e73042ac6c8c",
     "src/experiments/exp38_classical_recording_metrics.py": "23909985f12e2b1205fc5165d435717e3c602f1229e75a94d0f79a95b761ee7a",
-    "src/experiments/exp39_peer_review_controls.py": "8ad35e66a54891c34b91ba9818a9a03bff95809782e91f6370ff92f4576b2d61",
-    "src/experiments/exp40_release_consistency_audit.py": "44361e74eb702f3421b78d05bb03e30d11c488a900d0ccf7332f64af15dd5fbd",
-    "src/experiments/exp41_finalize_release_metadata.py": "6fb56375de35076a9bf48a05afb3d5ba5ead37883361a06a793b11fb94d8e391",
+    "src/experiments/exp39_peer_review_controls.py": "1a71b00fcf1a22a285367850e15f36a77971f64ecfae2f6c2fb2b11b15b48802",
+    "src/experiments/exp40_release_consistency_audit.py": "d9ba84ccc003a198b4b5c3c8ba2c1f296c439f036b5f57604b9571527e2e4d93",
+    "src/experiments/exp41_finalize_release_metadata.py": "b01c6bb1f61ce9f1e1c9802673ef30e9eede37bad497d1a571a1df89f437426a",
     "src/models/fusion_net.py": "0885c9fc39154534641dd809b0c62fccc2a76011415afa42a79a795262271ef6",
     "configs/mcc5_fusion.yaml": "9b09de482f77f7a1c97af17d82f9e67d1625775dac11c4310f2dfc02ae1feeb9"
   },
@@ -83,7 +90,8 @@
     "Raw MCC5 sensor recordings are not redistributed in this repository.",
     "A full numerical rerun requires the original MCC5 dataset.",
     "Distinct file hashes exclude byte-identical recordings but do not establish independent physical bearing specimens or acquisition sessions.",
-    "Acquisition-date controls provide mixed evidence: same-date fault separation remains perfect, while date-only and within-class date-prediction controls reveal residual session-proxy structure.",
+    "Same-date and severity-matched controls support within-date fault-class separability, but they do not establish specimen or session independence.",
+    "Outer-race date prediction is a date-severity composite control: a training-fold severity rule outperforms the signal model, so its accuracy is not independent evidence of session signatures.",
     "Random nonoverlapping-window assignment still shares source recordings across roles; recording grouping, rather than overlap removal alone, controls direct source-recording reuse.",
     "Auxiliary-26 and auxiliary-context-28 remain post-hoc exploratory on the same held-out 3000-rpm domain."
   ]
